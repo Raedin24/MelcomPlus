@@ -20,9 +20,116 @@ import coil.compose.AsyncImage
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
 
+//@Composable
+//fun ProductDetailScreen(product: Product, cartViewModel: CartViewModel = viewModel()) {
+//    var itemCount by remember { mutableStateOf(0) } // Track item count for the cart
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        // Load product image using Coil
+//        AsyncImage(
+//            model = product.imageUrl,
+//            contentDescription = product.name,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(250.dp)
+//        )
+//
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        // Product Name
+//        Text(
+//            text = product.name,
+//            style = MaterialTheme.typography.headlineSmall,
+//            modifier = Modifier.padding(bottom = 8.dp)
+//        )
+//
+//        // Price and Add to Cart row
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.SpaceBetween,
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            // Product Price
+//            Text(
+//                text = "₵${product.price}",
+//                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 20.sp)
+//            )
+//
+//            // Add to Cart / Quantity Control Button
+//            if (itemCount == 0) {
+//                // Initial Add to Cart button
+//                Button(
+//                    onClick = {
+//                        itemCount++
+//                        cartViewModel.addToCart(product)
+//                    },
+//                    shape = RoundedCornerShape(10),
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF008080)) // Teal color
+//                ) {
+//                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add to Cart")
+//                }
+//            } else {
+//                // Quantity control buttons
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    // Decrease button
+//                    Button(
+//                        onClick = {
+//                            if (itemCount > 0) itemCount--
+//                        },
+//                        shape = RoundedCornerShape(10),
+//                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800080)) // Purple color
+//                    ) {
+//                        Text("-")
+//                    }
+//                    Spacer(modifier = Modifier.width(8.dp))
+//
+//                    // Item count display
+//                    Text(text = "$itemCount", style = MaterialTheme.typography.headlineMedium)
+//
+//                    Spacer(modifier = Modifier.width(8.dp))
+//
+//                    // Increase button
+//                    Button(
+//                        onClick = { itemCount++ },
+//                        shape = RoundedCornerShape(10),
+//                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800080)) // Purple color
+//                    ) {
+//                        Text("+")
+//                    }
+//                }
+//            }
+//        }
+//
+//        Spacer(modifier = Modifier.height(24.dp))
+//
+//        // Product Details Section
+//        Text(
+//            text = "Product Details",
+//            style = MaterialTheme.typography.titleMedium
+//        )
+//        Spacer(modifier = Modifier.height(8.dp))
+//        Text(
+//            text = product.details,
+//            style = MaterialTheme.typography.bodyMedium,
+//            modifier = Modifier.padding(8.dp)
+//        )
+//    }
+//}
+
+
 @Composable
 fun ProductDetailScreen(product: Product, cartViewModel: CartViewModel = viewModel()) {
-    var itemCount by remember { mutableStateOf(0) } // Track item count for the cart
+    // Initialize item count by checking if the item already exists in the cart
+    var itemCount by remember {
+        mutableStateOf(cartViewModel.cartItems.find { it.product.name == product.name }?.quantity ?: 0)
+    }
 
     Column(
         modifier = Modifier
@@ -72,22 +179,29 @@ fun ProductDetailScreen(product: Product, cartViewModel: CartViewModel = viewMod
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF008080)) // Teal color
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add to Cart")
+                    Text("Add to Cart")
                 }
             } else {
                 // Quantity control buttons
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     // Decrease button
                     Button(
                         onClick = {
-                            if (itemCount > 0) itemCount--
+                            if (itemCount > 1) {
+                                itemCount--
+                                cartViewModel.decreaseQuantity(cartViewModel.cartItems.find { it.product.name == product.name }!!)
+                            } else {
+                                // Remove item from cart
+                                itemCount = 0
+                                cartViewModel.removeFromCart(cartViewModel.cartItems.find { it.product.name == product.name }!!)
+                            }
                         },
                         shape = RoundedCornerShape(10),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800080)) // Purple color
                     ) {
                         Text("-")
                     }
+
                     Spacer(modifier = Modifier.width(8.dp))
 
                     // Item count display
@@ -97,7 +211,10 @@ fun ProductDetailScreen(product: Product, cartViewModel: CartViewModel = viewMod
 
                     // Increase button
                     Button(
-                        onClick = { itemCount++ },
+                        onClick = {
+                            itemCount++
+                            cartViewModel.increaseQuantity(cartViewModel.cartItems.find { it.product.name == product.name }!!)
+                        },
                         shape = RoundedCornerShape(10),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800080)) // Purple color
                     ) {

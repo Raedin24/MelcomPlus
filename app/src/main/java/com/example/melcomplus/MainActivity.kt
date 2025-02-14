@@ -86,7 +86,7 @@ fun MelcomPlusApp() {
                         .find { it.name == productName } // Find the product based on its name
 
                     if (product != null) {
-                        ProductDetailScreen(product)
+                        ProductDetailScreen(product, cartViewModel)
                     } else {
                         Text("Product not found") // Handle product not found case
                     }
