@@ -65,6 +65,7 @@ fun CategoryCard(category: Category, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFD9D364)),
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f) // Ensures a square shape
