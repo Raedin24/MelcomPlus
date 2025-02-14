@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.coil.compose)
+    
 
 
 

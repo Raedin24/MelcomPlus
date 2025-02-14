@@ -25,19 +25,6 @@ import com.example.melcomplus.data.CategoryRepository
 
 
 
-//sealed class Screen(val route: String) {
-//    object Home : Screen("home")
-//    object Search : Screen("search")
-//    object ProductDetail : Screen("productDetail/{productId}") {
-//        fun createRoute(productId: String) = "productDetail/$productId"
-//    }
-//    object Cart : Screen("cart")
-//    object CategoryProducts : Screen("categoryProducts/{categoryName}") {
-//        fun createRoute(categoryName: String) = "categoryProducts/$categoryName"
-//    }
-//}
-
-
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Search : Screen("search")
@@ -57,6 +44,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MelcomPlusApp()
+//            HomeScreen(categories = CategoryRepository.categories)
         }
     }
 }
@@ -73,9 +61,12 @@ fun MelcomPlusApp() {
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(navController, startDestination = Screen.Home.route) {
                 composable(Screen.Home.route) {
-                    HomeScreen { categoryName ->
-                        navController.navigate(Screen.CategoryProducts.createRoute(categoryName))
-                    }
+                    HomeScreen(
+                        categories = CategoryRepository.categories, // Pass the category list
+                        onCategoryClick = { categoryName ->
+                            navController.navigate(Screen.CategoryProducts.createRoute(categoryName))
+                        }
+                    )
                 }
                 composable(Screen.Search.route) { SearchScreen(navController) }
                 composable(Screen.Cart.route) { CartScreen(cartViewModel) }
@@ -119,7 +110,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                 selected = currentRoute == screen.route,
                 onClick = { navController.navigate(screen.route) },
                 label = { Text(screen.route) },
-                icon = { /* Add an Icon if needed */ } // TODO
+                icon = { /* Add an Icon */ } // TODO
             )
         }
     }
