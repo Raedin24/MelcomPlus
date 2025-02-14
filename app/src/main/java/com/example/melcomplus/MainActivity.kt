@@ -104,27 +104,6 @@ fun MelcomPlusApp() {
 
 
 
-//@Composable
-//fun SearchScreen() {
-//    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-//        Text("Search Screen", style = MaterialTheme.typography.headlineSmall)
-//    }
-//}
-
-//@Composable
-//fun ProductDetailScreen(productId: String) {
-//    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-//        Text("Product Detail for ID: $productId", style = MaterialTheme.typography.headlineSmall)
-//    }
-//}
-
-@Composable
-fun CartScreen() {
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Cart Screen", style = MaterialTheme.typography.headlineSmall)
-    }
-}
-
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
