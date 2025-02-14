@@ -8,16 +8,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import androidx.compose.foundation.shape.RoundedCornerShape
 
-import com.example.melcomplus.viewmodels.CartViewModel
+
 import com.example.melcomplus.models.CartItem
+import com.example.melcomplus.viewmodels.CartViewModel
 
 @Composable
 fun CartScreen(cartViewModel: CartViewModel) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Cart", style = MaterialTheme.typography.headlineSmall)
@@ -32,7 +37,7 @@ fun CartScreen(cartViewModel: CartViewModel) {
             }
 
             Text(
-                text = "Total: \$${cartViewModel.totalCost}",
+                text = "Total: ₵${"%.2f".format(cartViewModel.totalCost)}",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -51,27 +56,57 @@ fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(cartItem.product.name, modifier = Modifier.weight(1f))
-            Text(text = "\$${cartItem.product.price}")
+            // Product Image
+            AsyncImage(
+                model = cartItem.product.imageUrl,
+                contentDescription = cartItem.product.name,
+                modifier = Modifier
+                    .size(60.dp)
+                    .padding(end = 8.dp)
+            )
 
-            Row {
-                IconButton(onClick = { cartViewModel.decreaseQuantity(cartItem) }) {
-                    Text("-")
-                }
-                Text(text = "${cartItem.quantity}", modifier = Modifier.padding(horizontal = 8.dp))
-                IconButton(onClick = { cartViewModel.increaseQuantity(cartItem) }) {
-                    Text("+")
-                }
+            // Product Name and Price
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(cartItem.product.name, style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "₵${cartItem.product.price}", style = MaterialTheme.typography.bodyMedium)
             }
 
-            IconButton(onClick = { cartViewModel.removeFromCart(cartItem) }) {
-                Text("🗑")
+            // Quantity Control
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { cartViewModel.decreaseQuantity(cartItem) },
+                    shape = RoundedCornerShape(30),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800080))
+                ) {
+                    Text("-")
+                }
+
+                Text(
+                    text = "${cartItem.quantity}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+
+                Button(
+                    onClick = { cartViewModel.increaseQuantity(cartItem) },
+                    shape = RoundedCornerShape(30),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800080))
+                ) {
+                    Text("+")
+                }
             }
         }
     }

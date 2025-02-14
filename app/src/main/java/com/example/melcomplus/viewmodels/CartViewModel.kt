@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.models.CartItem
+import java.math.RoundingMode
 
 class CartViewModel : ViewModel() {
     private val _cartItems = mutableStateListOf<CartItem>()
@@ -53,5 +54,8 @@ class CartViewModel : ViewModel() {
 
     private fun updateTotalCost() {
         totalCost = _cartItems.sumOf { it.product.price * it.quantity }
+            .toBigDecimal()
+            .setScale(2, RoundingMode.HALF_EVEN)
+            .toDouble()
     }
 }
