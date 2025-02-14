@@ -21,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.melcomplus.viewmodels.CartViewModel
 import com.example.melcomplus.screens.CategoryProductsScreen
 import com.example.melcomplus.screens.*
+import com.example.melcomplus.data.CategoryRepository
 
 
 
@@ -76,11 +77,19 @@ fun MelcomPlusApp() {
                         navController.navigate(Screen.CategoryProducts.createRoute(categoryName))
                     }
                 }
-                composable(Screen.Search.route) { SearchScreen() }
+                composable(Screen.Search.route) { SearchScreen(navController) }
                 composable(Screen.Cart.route) { CartScreen(cartViewModel) }
                 composable(Screen.ProductDetail.route) { backStackEntry ->
-                    val productId = backStackEntry.arguments?.getString("productId")
-                    ProductDetailScreen(productId ?: "")
+                    val productName = backStackEntry.arguments?.getString("productName") // Change from "productId" to "productName"
+                    val product = CategoryRepository.categories
+                        .flatMap { it.items }
+                        .find { it.name == productName } // Find the product based on its name
+
+                    if (product != null) {
+                        ProductDetailScreen(product)
+                    } else {
+                        Text("Product not found") // Handle product not found case
+                    }
                 }
                 composable(Screen.CategoryProducts.route) { backStackEntry ->
                     val categoryName = backStackEntry.arguments?.getString("categoryName")
@@ -102,12 +111,12 @@ fun MelcomPlusApp() {
 //    }
 //}
 
-@Composable
-fun ProductDetailScreen(productId: String) {
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Product Detail for ID: $productId", style = MaterialTheme.typography.headlineSmall)
-    }
-}
+//@Composable
+//fun ProductDetailScreen(productId: String) {
+//    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+//        Text("Product Detail for ID: $productId", style = MaterialTheme.typography.headlineSmall)
+//    }
+//}
 
 @Composable
 fun CartScreen() {
