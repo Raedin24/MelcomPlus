@@ -1,184 +1,67 @@
+//HomeScreen.kt
 package com.example.melcomplus.screens
 
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-//import androidx.compose.foundation.lazy.grid.GridCells
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.Composable
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.graphics.Color
-//import androidx.compose.ui.text.font.FontWeight
-//import androidx.compose.ui.unit.dp
-//import coil.compose.rememberImagePainter
-//import androidx.compose.ui.layout.ContentScale
-//
-//import com.example.melcomplus.models.Product
-//
-//@Composable
-//fun HomeScreen(products: List<Product>, onAddToCart: (Product) -> Unit) {
-//    LazyVerticalGrid(
-//        columns = GridCells.Fixed(3),
-//        modifier = Modifier.fillMaxSize()
-//    ) {
-//        items(products.size) { index ->
-//            ProductTile(product = products[index], onAddToCart = onAddToCart)
-//        }
-//    }
-//}
-//
-//@Composable
-//fun ProductTile(product: Product, onAddToCart: (Product) -> Unit) {
-//    Card(
-//        modifier = Modifier
-//            .padding(8.dp)
-//            .fillMaxWidth()
-//            .height(250.dp),
-//        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // Corrected this line
-//    ) {
-//        Column(
-//            modifier = Modifier.fillMaxSize()
-//        ) {
-//            // Image
-//            Image(
-//                painter = rememberImagePainter(product.imageUrl),
-//                contentDescription = product.name,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .weight(1f),
-//                contentScale = ContentScale.Crop
-//            )
-//
-//            // Product details
-//            Column(
-//                modifier = Modifier
-//                    .padding(8.dp)
-//                    .weight(1f)
-//            ) {
-//                Text(text = product.name, fontWeight = FontWeight.Bold)
-//                Spacer(modifier = Modifier.height(4.dp))
-//                Text(text = "\$${product.price}", color = Color.Gray)
-//                Spacer(modifier = Modifier.height(8.dp))
-//
-//                // Add to Cart button
-//                Button(
-//                    onClick = { onAddToCart(product) },
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text("Add to Cart")
-//                }
-//            }
-//        }
-//    }
-//}
-
-
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
-
 import com.example.melcomplus.data.CategoryRepository
 import com.example.melcomplus.models.Category
-import com.example.melcomplus.models.Product
-import com.example.melcomplus.ui.theme.yellowCat
-
-//import com.example.melcomplus.ui.theme.
 
 @Composable
-fun HomeScreen() {
-    val categories = CategoryRepository.categories
-    val featuredProducts = categories.flatMap { it.items }.take(5) // Sample 5 featured products
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // Greeting Section
-        Text(
-            text = "Hi Kofi!",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Horizontal Featured Products
-        Text(
-            text = "Recommended Products",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(featuredProducts.size) { index ->
-                ProductCard(product = featuredProducts[index])
+fun HomeScreen(onCategoryClick: (String) -> Unit) {
+    Scaffold(
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .padding(16.dp) // Inner padding for spacing the text
+            ) {
+                Text(
+                    text = "Melcom Plus",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Categories Section
-        Text(
-            text = "Categories",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3), // 3 columns
-            contentPadding = PaddingValues(4.dp)
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(categories.size) { index ->
-                CategoryCard(category = categories[index])
+            items(CategoryRepository.categories) { category ->
+                CategoryCard(
+                    category = category,
+                    onClick = { onCategoryClick(category.name) }
+                )
             }
         }
     }
 }
 
-@Composable
-fun ProductCard(product: Product) {
-    Box(
-        modifier = Modifier
-            .size(120.dp)
-            .background(Color.LightGray, shape = MaterialTheme.shapes.medium)
-            .clickable { /* Navigate to product details */ },
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = rememberImagePainter(data = product.imageUrl),
-            contentDescription = product.name,
-            modifier = Modifier.size(80.dp)
-        )
-    }
-}
 
 @Composable
-fun CategoryCard(category: Category, backgroundColor: Color = yellowCat) {
+fun CategoryCard(category: Category, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .padding(4.dp)
-            .background(backgroundColor, shape = RoundedCornerShape(8.dp))
-            .clickable { /* Handle category click */ }
             .fillMaxWidth()
-            .aspectRatio(1f),
-        contentAlignment = Alignment.Center
+            .padding(8.dp)
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable { onClick() }
+            .padding(16.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(
-                painter = rememberImagePainter(data = category.icon),
-                contentDescription = category.name,
-                modifier = Modifier.size(48.dp)
-            )
-            Text(
-                text = category.name,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
-        }
+        Text(text = category.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onPrimary)
     }
 }

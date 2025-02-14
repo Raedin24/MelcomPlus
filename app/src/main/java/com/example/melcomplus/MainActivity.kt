@@ -20,20 +20,35 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.melcomplus.viewmodels.CartViewModel
 import com.example.melcomplus.screens.CategoryProductsScreen
+import com.example.melcomplus.screens.*
 
+
+
+//sealed class Screen(val route: String) {
+//    object Home : Screen("home")
+//    object Search : Screen("search")
+//    object ProductDetail : Screen("productDetail/{productId}") {
+//        fun createRoute(productId: String) = "productDetail/$productId"
+//    }
+//    object Cart : Screen("cart")
+//    object CategoryProducts : Screen("categoryProducts/{categoryName}") {
+//        fun createRoute(categoryName: String) = "categoryProducts/$categoryName"
+//    }
+//}
 
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Search : Screen("search")
-    object ProductDetail : Screen("productDetail/{productId}") {
-        fun createRoute(productId: String) = "productDetail/$productId"
-    }
     object Cart : Screen("cart")
     object CategoryProducts : Screen("categoryProducts/{categoryName}") {
         fun createRoute(categoryName: String) = "categoryProducts/$categoryName"
     }
+    object ProductDetail : Screen("productDetail/{productName}") {
+        fun createRoute(productName: String) = "productDetail/$productName"
+    }
 }
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,9 +71,13 @@ fun MelcomPlusApp() {
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(navController, startDestination = Screen.Home.route) {
-                composable(Screen.Home.route) { HomeScreen(navController) }
+                composable(Screen.Home.route) {
+                    HomeScreen { categoryName ->
+                        navController.navigate(Screen.CategoryProducts.createRoute(categoryName))
+                    }
+                }
                 composable(Screen.Search.route) { SearchScreen() }
-                composable(Screen.Cart.route) { CartScreen() }
+                composable(Screen.Cart.route) { CartScreen(cartViewModel) }
                 composable(Screen.ProductDetail.route) { backStackEntry ->
                     val productId = backStackEntry.arguments?.getString("productId")
                     ProductDetailScreen(productId ?: "")
@@ -76,25 +95,12 @@ fun MelcomPlusApp() {
 
 
 
-@Composable
-fun HomeScreen(navController: NavHostController) {
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Home Screen", style = MaterialTheme.typography.headlineSmall)
-        Button(onClick = { navController.navigate(Screen.Search.route) }) {
-            Text("Go to Search")
-        }
-        Button(onClick = { navController.navigate(Screen.Cart.route) }) {
-            Text("Go to Cart")
-        }
-    }
-}
-
-@Composable
-fun SearchScreen() {
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Search Screen", style = MaterialTheme.typography.headlineSmall)
-    }
-}
+//@Composable
+//fun SearchScreen() {
+//    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+//        Text("Search Screen", style = MaterialTheme.typography.headlineSmall)
+//    }
+//}
 
 @Composable
 fun ProductDetailScreen(productId: String) {

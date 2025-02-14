@@ -8,24 +8,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.melcomplus.data.CategoryRepository
 
-@Preview
 @Composable
 fun SearchScreen() {
     var query by remember { mutableStateOf("") }
-    val products = listOf("Laptop", "Phone", "Headphones", "Smartwatch")
-    val filteredProducts = products.filter { it.contains(query, ignoreCase = true) }
+
+    // Fetch products from all categories
+    val products = CategoryRepository.categories.flatMap { it.items }
+
+    val filteredProducts = products.filter { it.name.contains(query, ignoreCase = true) }
 
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         TextField(
             value = query,
             onValueChange = { query = it },
-            label = { Text("Search Products") }
+            label = { Text("Search Products") },
+            modifier = Modifier.fillMaxWidth().padding(16.dp)
         )
         LazyColumn {
             items(filteredProducts) { product ->
-                Text(text = product, modifier = Modifier.padding(16.dp))
+                Text(text = product.name, modifier = Modifier.padding(16.dp))
             }
         }
     }
