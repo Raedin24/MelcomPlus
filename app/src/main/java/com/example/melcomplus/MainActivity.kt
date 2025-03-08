@@ -107,7 +107,7 @@ fun MelcomPlusApp() {
                 composable(Screen.CategoryProducts.route) { backStackEntry ->
                     val categoryName = backStackEntry.arguments?.getString("categoryName")
                     if (categoryName != null) {
-                        CategoryProductsScreen(navController, categoryName)
+                        CategoryProductsScreen(navController, categoryName, cartViewModel)
                     }
                 }
             }
