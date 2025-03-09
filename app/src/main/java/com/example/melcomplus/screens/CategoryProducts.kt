@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,16 +48,12 @@ import com.example.melcomplus.data.CategoryRepository
 import com.example.melcomplus.models.Category
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun CategoryProductsScreen(
     navController: NavHostController,
-    categoryName: String, // Add categoryName parameter
+    categoryName: String,
     cartViewModel: CartViewModel
 ) {
     // Find the category by name
@@ -63,8 +61,9 @@ fun CategoryProductsScreen(
 
     if (category != null) {
         val categories = CategoryRepository.categories // Use all categories
+
         // Corrected pagerState initialization
-        val pagerState = rememberPagerState(initialPage = 0)
+        val pagerState = rememberPagerState(pageCount = { categories.size }, initialPage = 0)
 
         val coroutineScope = rememberCoroutineScope()
 
@@ -82,15 +81,13 @@ fun CategoryProductsScreen(
             )
 
             HorizontalPager(
-                count = categories.size,
-                state = pagerState,
+                state = pagerState, // Pass the pagerState
                 modifier = Modifier.fillMaxSize().weight(1f)
             ) { page ->
                 val currentCategory = categories.getOrNull(page)
-
-                currentCategory?.let {
+                if (currentCategory != null) {
                     CategoryProductsPage(
-                        category = it,
+                        category = currentCategory,
                         navController = navController,
                         cartViewModel = cartViewModel
                     )
@@ -261,7 +258,7 @@ fun ProductTile(
 
             Text(
                 text = "₵${product.price}",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray,
                 modifier = Modifier.fillMaxWidth().padding(bottom = 1.dp),
                 textAlign = TextAlign.Left

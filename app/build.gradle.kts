@@ -60,11 +60,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
     implementation(libs.androidx.core.splashscreen)
-//    implementation(libs.androidx.constraintlayout.widget)
     implementation(libs.coil.compose)
-    implementation(libs.accompanist.pager) // Add this line
-    
-
-
+    implementation("androidx.compose.foundation:foundation:1.7.8")
 
 }
