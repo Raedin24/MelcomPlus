@@ -1,61 +1,88 @@
-//CartViewModel.kt
+////CartViewModel.kt
+
 package com.example.melcomplus.viewmodels
 
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.math.RoundingMode
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.models.CartItem
-import java.math.RoundingMode
 
 class CartViewModel : ViewModel() {
-    private val _cartItems = mutableStateListOf<CartItem>()
-    val cartItems: List<CartItem> get() = _cartItems
+    // Use MutableStateFlow for cartItems to make it observable
+    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
+    val cartItems: StateFlow<List<CartItem>> get() = _cartItems.asStateFlow()
 
-    var totalCost by mutableDoubleStateOf(0.0)
-        private set
+    // Use MutableStateFlow for totalCost to make it observable
+    private val _totalCost = MutableStateFlow(0.0)
+    val totalCost: StateFlow<Double> get() = _totalCost.asStateFlow()
 
     fun addToCart(product: Product) {
-        val existingItem = _cartItems.find {it.product.name == product.name}
-        if (existingItem != null) {
-            existingItem.quantity += 1
-        } else {
-            _cartItems.add(CartItem(product, 1))
+        viewModelScope.launch {
+            val existingItem = _cartItems.value.find { it.product.name == product.name }
+            if (existingItem != null) {
+                // If the product is already in the cart, increase its quantity
+                _cartItems.value = _cartItems.value.map {
+                    if (it.product.name == product.name) it.copy(quantity = it.quantity + 1)
+                    else it
+                }
+            } else {
+                // If the product is not in the cart, add it with quantity 1
+                _cartItems.value = _cartItems.value + CartItem(product, 1)
+            }
+            updateTotalCost()
         }
-        updateTotalCost()
     }
 
     fun increaseQuantity(cartItem: CartItem) {
-        cartItem.quantity += 1
-        updateTotalCost()
+        viewModelScope.launch {
+            _cartItems.value = _cartItems.value.map {
+                if (it.product.name == cartItem.product.name) it.copy(quantity = it.quantity + 1)
+                else it
+            }
+            updateTotalCost()
+        }
     }
 
     fun decreaseQuantity(cartItem: CartItem) {
-        if (cartItem.quantity > 1) {
-            cartItem.quantity -= 1
-        } else {
-            _cartItems.remove(cartItem)
+        viewModelScope.launch {
+            if (cartItem.quantity > 1) {
+                _cartItems.value = _cartItems.value.map {
+                    if (it.product.name == cartItem.product.name) it.copy(quantity = it.quantity - 1)
+                    else it
+                }
+            } else {
+                // Remove item from cart if quantity is 1
+                _cartItems.value = _cartItems.value.filter { it.product.name != cartItem.product.name }
+            }
+            updateTotalCost()
         }
-        updateTotalCost()
     }
+
     fun removeFromCart(cartItem: CartItem) {
-        _cartItems.remove(cartItem)
-        updateTotalCost()
+        viewModelScope.launch {
+            _cartItems.value = _cartItems.value.filter { it.product.name != cartItem.product.name }
+            updateTotalCost()
+        }
     }
 
     fun clearCart() {
-        _cartItems.clear()
-        totalCost = 0.0
+        viewModelScope.launch {
+            _cartItems.value = emptyList()
+            _totalCost.value = 0.0
+        }
     }
 
     private fun updateTotalCost() {
-        totalCost = _cartItems.sumOf { it.product.price * it.quantity }
-            .toBigDecimal()
-            .setScale(2, RoundingMode.HALF_EVEN)
-            .toDouble()
+        viewModelScope.launch {
+            _totalCost.value = _cartItems.value.sumOf { it.product.price * it.quantity }
+                .toBigDecimal()
+                .setScale(2, RoundingMode.HALF_EVEN)
+                .toDouble()
+        }
     }
 }

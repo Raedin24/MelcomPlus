@@ -1,18 +1,18 @@
 package com.example.melcomplus.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,13 +20,14 @@ import coil.compose.AsyncImage
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
 
-
 @Composable
 fun ProductDetailScreen(product: Product, cartViewModel: CartViewModel = viewModel()) {
-    // Initialize item count by checking if the item already exists in the cart
-    var itemCount by remember {
-        mutableStateOf(cartViewModel.cartItems.find { it.product.name == product.name }?.quantity ?: 0)
-    }
+    // Collect cartItems state from CartViewModel
+    val cartItems by cartViewModel.cartItems.collectAsState()
+
+    // Derive itemCount from cartItems
+    val cartItem = cartItems.find { it.product.name == product.name }
+    var itemCount by remember { mutableStateOf(cartItem?.quantity ?: 0) }
 
     Column(
         modifier = Modifier
@@ -69,53 +70,65 @@ fun ProductDetailScreen(product: Product, cartViewModel: CartViewModel = viewMod
                 // Initial Add to Cart button
                 Button(
                     onClick = {
-                        itemCount++
                         cartViewModel.addToCart(product)
+                        itemCount++
                     },
-                    shape = RoundedCornerShape(10),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF008080)) // Teal color
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF008080), // Teal color
+                        contentColor = Color.White
+                    ),
+                    border = BorderStroke(1.dp, Color(0xFF008080)),
+                    modifier = Modifier.width(150.dp), // Set a fixed width
+                    contentPadding = PaddingValues(4.dp)
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add to Cart")
                     Text("Add to Cart")
                 }
             } else {
                 // Quantity control buttons
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Decrease button
-                    Button(
+                Row(
+                    modifier = Modifier
+                        .width(150.dp) // Set a fixed width
+                        .background(Color(0xFF800080), shape = RoundedCornerShape(8.dp))
+                        .border(1.dp, Color(0xFF800080), shape = RoundedCornerShape(8.dp)),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
                         onClick = {
-                            if (itemCount > 1) {
-                                itemCount--
-                                cartViewModel.decreaseQuantity(cartViewModel.cartItems.find { it.product.name == product.name }!!)
-                            } else {
-                                // Remove item from cart
-                                itemCount = 0
-                                cartViewModel.removeFromCart(cartViewModel.cartItems.find { it.product.name == product.name }!!)
+                            cartItem?.let {
+                                if (it.quantity > 1) {
+                                    cartViewModel.decreaseQuantity(it)
+                                    itemCount--
+                                } else {
+                                    cartViewModel.removeFromCart(it)
+                                    itemCount = 0
+                                }
                             }
                         },
-                        shape = RoundedCornerShape(10),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800080)) // Purple color
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(2.dp)
                     ) {
-                        Text("-")
+                        Text("-", color = Color.White)
                     }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "$itemCount",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
 
-                    // Item count display
-                    Text(text = "$itemCount", style = MaterialTheme.typography.headlineMedium)
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Increase button
-                    Button(
+                    TextButton(
                         onClick = {
+                            cartItem?.let { cartViewModel.increaseQuantity(it) }
                             itemCount++
-                            cartViewModel.increaseQuantity(cartViewModel.cartItems.find { it.product.name == product.name }!!)
                         },
-                        shape = RoundedCornerShape(10),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800080)) // Purple color
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(2.dp)
                     ) {
-                        Text("+")
+                        Text("+", color = Color.White)
                     }
                 }
             }
@@ -126,13 +139,18 @@ fun ProductDetailScreen(product: Product, cartViewModel: CartViewModel = viewMod
         // Product Details Section
         Text(
             text = "Product Details",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Left,
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = product.details,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(8.dp)
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            textAlign = TextAlign.Left
         )
     }
 }

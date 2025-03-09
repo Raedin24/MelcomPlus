@@ -6,19 +6,62 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.foundation.shape.RoundedCornerShape
-
-
 import com.example.melcomplus.models.CartItem
 import com.example.melcomplus.viewmodels.CartViewModel
 
+//@Composable
+//fun CartScreen(cartViewModel: CartViewModel) {
+//    // Collect cartItems state from CartViewModel
+//    val cartItems by cartViewModel.cartItems.collectAsState()
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Text("Cart", style = MaterialTheme.typography.headlineSmall)
+//
+//        if (cartItems.isEmpty()) {
+//            Text("Cart is empty", style = MaterialTheme.typography.bodyLarge)
+//        } else {
+//            LazyColumn(modifier = Modifier.weight(1f)) {
+//                items(cartItems) { cartItem ->
+//                    CartItemRow(cartItem, cartViewModel)
+//                }
+//            }
+//
+//            Text(
+//                text = "Total: ₵${"%.2f".format(cartViewModel.totalCost.value)}",
+//                style = MaterialTheme.typography.titleLarge,
+//                modifier = Modifier.padding(vertical = 8.dp)
+//            )
+//            Button(
+//                onClick = { cartViewModel.clearCart() },
+//                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+//            ) {
+//                Text("Clear Cart")
+//            }
+//        }
+//    }
+//}
+
 @Composable
 fun CartScreen(cartViewModel: CartViewModel) {
+    // Collect cartItems state from CartViewModel
+    val cartItems by cartViewModel.cartItems.collectAsState()
+
+    // Collect totalCost state from CartViewModel
+    val totalCost by cartViewModel.totalCost.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -27,17 +70,17 @@ fun CartScreen(cartViewModel: CartViewModel) {
     ) {
         Text("Cart", style = MaterialTheme.typography.headlineSmall)
 
-        if (cartViewModel.cartItems.isEmpty()) {
+        if (cartItems.isEmpty()) {
             Text("Cart is empty", style = MaterialTheme.typography.bodyLarge)
         } else {
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(cartViewModel.cartItems) { cartItem ->
+                items(cartItems) { cartItem ->
                     CartItemRow(cartItem, cartViewModel)
                 }
             }
 
             Text(
-                text = "Total: ₵${"%.2f".format(cartViewModel.totalCost)}",
+                text = "Total: ₵${"%.2f".format(totalCost)}", // Use collected state
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(vertical = 8.dp)
             )

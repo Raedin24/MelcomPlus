@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 //    implementation(libs.androidx.constraintlayout.widget)
     implementation(libs.coil.compose)
+    implementation(libs.accompanist.pager) // Add this line
     
 
 
