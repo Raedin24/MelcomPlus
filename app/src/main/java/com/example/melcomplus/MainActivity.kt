@@ -82,8 +82,12 @@ fun MelcomPlusApp() {
                 composable(Screen.Home.route) {
                     HomeScreen(
                         categories = CategoryRepository.categories, // Pass the category list
+                        cartViewModel =cartViewModel,
                         onCategoryClick = { categoryName ->
                             navController.navigate(Screen.CategoryProducts.createRoute(categoryName))
+                        },
+                        onProductClick = {product ->
+                            navController.navigate(Screen.ProductDetail.createRoute(product.name))
                         }
                     )
                 }

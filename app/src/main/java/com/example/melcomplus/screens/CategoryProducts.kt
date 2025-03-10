@@ -48,6 +48,7 @@ import com.example.melcomplus.data.CategoryRepository
 import com.example.melcomplus.models.Category
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
+import com.example.melcomplus.components.ProductTile
 import kotlinx.coroutines.launch
 
 @Composable
@@ -161,117 +162,6 @@ fun CategoryProductsPage(
                 onProductClick = {
                     navController.navigate(Screen.ProductDetail.createRoute(product.name))
                 }
-            )
-        }
-    }
-}
-
-@Composable
-fun ProductTile(
-    product: Product,
-    cartViewModel: CartViewModel,
-    onProductClick: (Product) -> Unit
-) {
-    val cartItems by cartViewModel.cartItems.collectAsState()
-    val cartItem = cartItems.find { it.product.name == product.name }
-
-    var itemCount by remember { mutableStateOf(cartItem?.quantity ?: 0) }
-
-    Card(
-        shape = RoundedCornerShape(15.dp),
-        modifier = Modifier.fillMaxWidth().height(200.dp)
-            .clickable { onProductClick(product) },
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(4.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            AsyncImage(
-                model = product.imageUrl,
-                contentDescription = product.name,
-                modifier = Modifier.fillMaxWidth().height(100.dp),
-            )
-
-            if (itemCount == 0) {
-                Button(
-                    onClick = {
-                        cartViewModel.addToCart(product)
-                        itemCount++
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color(0xFF800080)
-                    ),
-                    border = BorderStroke(1.dp, Color(0xFF800080)),
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(4.dp)
-                ) {
-                    Text("Add to Cart")
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .background(Color(0xFF800080), shape = RoundedCornerShape(8.dp))
-                        .border(1.dp, Color(0xFF800080), shape = RoundedCornerShape(10.dp)),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(
-                        onClick = {
-                            cartItem?.let {
-                                if (it.quantity > 1) {
-                                    cartViewModel.decreaseQuantity(it)
-                                    itemCount--
-                                } else {
-                                    cartViewModel.removeFromCart(it)
-                                    itemCount = 0
-                                }
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(2.dp)
-                    ) {
-                        Text("-", color = Color.White)
-                    }
-
-                    Text(
-                        text = "$itemCount",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-
-                    TextButton(
-                        onClick = {
-                            cartItem?.let { cartViewModel.increaseQuantity(it) }
-                            itemCount++
-                        },
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(2.dp)
-                    ) {
-                        Text("+", color = Color.White)
-                    }
-                }
-            }
-
-            Text(
-                text = "₵${product.price}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 1.dp),
-                textAlign = TextAlign.Left
-            )
-
-            Text(
-                text = product.name,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Black,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Left
             )
         }
     }
