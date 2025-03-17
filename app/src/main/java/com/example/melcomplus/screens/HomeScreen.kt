@@ -1,296 +1,183 @@
-//package com.example.melcomplus.screens
-//
-//import androidx.compose.foundation.Image
-//import androidx.compose.foundation.background
-//import androidx.compose.foundation.clickable
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.lazy.LazyRow
-//import androidx.compose.foundation.shape.RoundedCornerShape
-//import androidx.compose.foundation.lazy.grid.GridCells
-//import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.Composable
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.graphics.Color
-//import androidx.compose.ui.layout.ContentScale
-//import androidx.compose.ui.text.style.TextAlign
-//import androidx.compose.ui.unit.dp
-//import androidx.compose.ui.unit.sp
-//import coil.compose.rememberImagePainter
-//import com.example.melcomplus.models.Category
-//import com.example.melcomplus.models.Product
-//import com.example.melcomplus.viewmodels.CartViewModel
-//import com.example.melcomplus.components.ProductTile
-//
-//
-//@Composable
-//fun HomeScreen(
-//    categories: List<Category>, // Pass the category list
-//    onCategoryClick: (String) -> Unit, // Pass a navigation callback
-//    cartViewModel: CartViewModel,
-//    onProductClick: (Product) -> Unit
-//) {
-//    Column(modifier = Modifier.padding(16.dp)) {
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text(
-//                text = "Categories",
-//                style = MaterialTheme.typography.headlineSmall,
-//                color = Color.Black
-//            )
-////            Text(
-////                text = "View All",
-////                style = MaterialTheme.typography.bodyMedium,
-////                color = MaterialTheme.colorScheme.primary,
-////                modifier = Modifier.clickable { /* Navigate to all categories */ }
-////            )
-//        }
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        LazyVerticalGrid(
-//            columns = GridCells.Fixed(3),
-//            modifier = Modifier.fillMaxSize(),
-//            verticalArrangement = Arrangement.spacedBy(8.dp),
-//            horizontalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            items(categories.size) { index ->
-//                val category = categories[index]
-//                CategoryCard(
-//                    category = category,
-//                    onClick = { onCategoryClick(category.name) }
-//                )
-//            }
-//        }
-//
-//        // Best Seller Section
-//        BestSellerSection(
-//            categories = categories,
-//            cartViewModel = cartViewModel,
-//            onProductClick = onProductClick
-//        )
-//    }
-//}
-//
-//@Composable
-//fun CategoryCard(category: Category, onClick: () -> Unit) {
-//    Card(
-//        shape = RoundedCornerShape(12.dp),
-//        elevation = CardDefaults.cardElevation(8.dp),
-//        colors = CardDefaults.cardColors(containerColor = Color(0xFFD9D364)),
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .aspectRatio(1f) // Ensures a square shape
-//            .padding(4.dp)
-//            .clickable(onClick = onClick) // Add click behavior to navigate
-//    ) {
-//        Column(
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center,
-//            modifier = Modifier.padding(8.dp)
-//        ) {
-//            Image(
-//                painter = rememberImagePainter(data = category.icon),
-//                contentDescription = category.name,
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier.size(60.dp)
-//            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Text(
-//                text = category.name,
-//                style = MaterialTheme.typography.bodySmall,
-//                textAlign = TextAlign.Center,
-//                color = Color.Black,
-//                fontSize = 14.sp
-//            )
-//        }
-//    }
-//}
-//
-//@Composable
-//fun BestSellerSection(
-//    categories: List<Category>,
-//    cartViewModel: CartViewModel,
-//    onProductClick: (Product) -> Unit
-//) {
-//    // Get the first 2 products from each category
-//    val bestSellerProducts = categories.flatMap { it.items.take(2) }
-//
-//    Box(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .height(250.dp)
-//            .background(Color.Red)
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(16.dp)
-//        ) {
-//            // Best Seller Text
-//            Text(
-//                text = "Best Seller",
-//                style = MaterialTheme.typography.headlineSmall,
-//                color = Color.White,
-//                modifier = Modifier.padding(bottom = 8.dp)
-//            )
-//
-//            // Horizontal Scrollable Product Tiles
-//            LazyRow (
-//                horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                items(bestSellerProducts) { product ->
-//                    ProductTile(
-//                        product = product,
-//                        cartViewModel = cartViewModel,
-//                        onProductClick = onProductClick
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//
-
-
 package com.example.melcomplus.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
-import android.util.Log
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.melcomplus.components.BottomNavigationBar
+import com.example.melcomplus.components.ProductTile
 import com.example.melcomplus.models.Category
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
-import com.example.melcomplus.components.ProductTile
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.navigation.compose.rememberNavController
+import com.example.melcomplus.R
+
 
 @Composable
 fun HomeScreen(
     categories: List<Category>,
     onCategoryClick: (String) -> Unit,
     cartViewModel: CartViewModel,
-    onProductClick: (Product) -> Unit
+    onProductClick: (Product) -> Unit,
+    navController: NavHostController,
+//    onBackClick: () -> Unit
 ) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+    Scaffold(
+        bottomBar = { BottomNavigationBar(navController) }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(bottom = 16.dp) // Prevents overlap with bottom bar
         ) {
-            Text(
-                text = "Categories",
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.Black
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-//            modifier = Modifier.fillMaxSize(),
-//            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(categories.size) { index ->
-                val category = categories[index]
-                CategoryCard(
-                    category = category,
-                    onClick = { onCategoryClick(category.name) }
+            item {
+                Text(
+                    text = "Categories",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.Black,
+                    modifier = Modifier.padding(10.dp)
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Categories in a static 3-column grid (without LazyVerticalGrid)
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val rows = categories.chunked(3) // Split categories into rows of 3
+                    rows.forEach { rowCategories ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowCategories.forEach { category ->
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f) // Makes each card take equal space
+                                        .aspectRatio(1f) // Ensures a square layout like before
+                                ) {
+                                    CategoryCard(
+                                        category = category,
+                                        onClick = { onCategoryClick(category.name) }
+                                    )
+                                }
+                            }
+                            // Fill empty spaces if the last row has less than 3 items
+                            repeat(3 - rowCategories.size) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                OrderAgainSection(categories, cartViewModel, onProductClick)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                BestSellerSection(categories, cartViewModel, onProductClick)
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        BestSellerSection(
-            categories = categories,
-            cartViewModel = cartViewModel,
-            onProductClick = onProductClick
-        )
     }
 }
 
+
+
 @Composable
-fun CategoryCard(category: Category, onClick: () -> Unit) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFD9D364)),
+fun CategoryCard(category: Category, onClick: (String) -> Unit) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
             .padding(4.dp)
-            .clickable(onClick = onClick)
+//            .clickable(onClick = onClick)
+            .clickable { onClick.invoke(category.name) }
+            .clip(RoundedCornerShape(12.dp))
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(8.dp)
+        // Background Image
+        AsyncImage(
+            model = category.icon,
+            contentDescription = category.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize()
+        )
+
+        // Text Overlay on Top Left
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black.copy(alpha = 0.4f)) // Semi-transparent overlay
+                .padding(8.dp),
+            contentAlignment = Alignment.TopStart
         ) {
-            AsyncImage(
-                model = category.icon,
-                contentDescription = category.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.size(60.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = category.name,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-                color = Color.Black,
-                fontSize = 14.sp
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White,
+                fontSize = 14.sp,
             )
         }
     }
 }
 
 @Composable
-fun BestSellerSection(
+fun OrderAgainSection(
     categories: List<Category>,
     cartViewModel: CartViewModel,
     onProductClick: (Product) -> Unit
 ) {
-    val bestSellerProducts = categories.flatMap { it.items.take(2) }
-    Log.d("BestSellerSection", "Best Seller Products: ${bestSellerProducts.size}")
+    val orderAgainProducts = categories.firstOrNull()?.items?.take(2) ?: emptyList()
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .background(Color.Red)
-    ) {
+    if (orderAgainProducts.isNotEmpty()) {
         Column(
             modifier = Modifier
-                .wrapContentHeight()
-                .padding(16.dp)
+                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+
         ) {
             Text(
-                text = "Best Seller",
+                text = "Order Again",
                 style = MaterialTheme.typography.headlineSmall,
-                color = Color.White,
+                color = Color.Black,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
@@ -298,8 +185,7 @@ fun BestSellerSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(bestSellerProducts.size) { index ->
-                    val product = bestSellerProducts[index]
+                items(orderAgainProducts) { product ->
                     ProductTile(
                         product = product,
                         cartViewModel = cartViewModel,
@@ -312,6 +198,57 @@ fun BestSellerSection(
 }
 
 
+@Composable
+fun BestSellerSection(
+    categories: List<Category>,
+    cartViewModel: CartViewModel,
+    onProductClick: (Product) -> Unit
+) {
+    val bestSellerProducts = categories.flatMap { it.items.take(2) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp) // Adjust height as needed
+    ) {
+        // Use painterResource instead of AsyncImage for local drawable
+        Image(
+            painter = painterResource(id = R.drawable.splashscreen),
+            contentDescription = "Best Seller Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize()
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+//                .background(Color.Black.copy(alpha = 0.3f)) // Optional dark overlay
+        ) {
+            Text(
+                text = "Best Seller",
+                style = MaterialTheme.typography.headlineSmall,
+                color = Color.White,
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .background(Color.Black.copy(alpha = 0.3f)) // Optional dark overlay
+            )
+
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(bestSellerProducts) { product ->
+                    ProductTile(
+                        product = product,
+                        cartViewModel = cartViewModel,
+                        onProductClick = onProductClick
+                    )
+                }
+            }
+        }
+    }
+}
 
 
 @Preview(showBackground = true)
@@ -338,10 +275,19 @@ fun HomeScreenPreview() {
         )
     )
 
+//    val navController = androidx.navigation.compose.rememberNavController()
+    val navController = rememberNavController()
+    // Fix: Define onCategoryClick properly
+    val onCategoryClick: (String) -> Unit = { categoryName ->
+        navController.navigate("category/$categoryName")
+    }
+
     HomeScreen(
         categories = sampleCategories,
-        onCategoryClick = {},
+        onCategoryClick = onCategoryClick,
         cartViewModel = CartViewModel(),
-        onProductClick = {}
+        onProductClick = {},
+        navController = navController,
+//        onBackClick = { navController.popBackStack() } // Handle back navigation
     )
 }

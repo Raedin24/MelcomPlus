@@ -37,11 +37,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.melcomplus.Screen
 import com.example.melcomplus.data.CategoryRepository
@@ -49,59 +52,80 @@ import com.example.melcomplus.models.Category
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
 import com.example.melcomplus.components.ProductTile
+import com.example.melcomplus.components.TopNavigationBar
 import kotlinx.coroutines.launch
 
 @Composable
 fun CategoryProductsScreen(
     navController: NavHostController,
     categoryName: String,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel,
+    onBackClick: () -> Unit
 ) {
     // Find the category by name
     val category = CategoryRepository.categories.find { it.name == categoryName }
 
-    if (category != null) {
-        val categories = CategoryRepository.categories // Use all categories
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        // Add the TopNavigationBar at the top
+        TopNavigationBar(
+            title = "Category", // Use the category name as the title
+            onBackClick = onBackClick
+        )
 
-        // Corrected pagerState initialization
-        val pagerState = rememberPagerState(pageCount = { categories.size }, initialPage = 0)
+        if (category != null) {
+            val categories = CategoryRepository.categories // Use all categories
 
-        val coroutineScope = rememberCoroutineScope()
+            // Calculate the initial page index based on the categoryName
+            val initialPageIndex = categories.indexOfFirst { it.name == categoryName }
+                .coerceAtLeast(0) // Ensure it's not negative
 
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CategoryNavigationBar(
-                categories = categories,
-                selectedCategoryIndex = pagerState.currentPage,
-                onCategorySelected = { index ->
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                }
+            // Initialize pagerState with the correct initial page
+            val pagerState = rememberPagerState(
+                pageCount = { categories.size },
+                initialPage = initialPageIndex
             )
 
-            HorizontalPager(
-                state = pagerState, // Pass the pagerState
-                modifier = Modifier.fillMaxSize().weight(1f)
-            ) { page ->
-                val currentCategory = categories.getOrNull(page)
-                if (currentCategory != null) {
-                    CategoryProductsPage(
-                        category = currentCategory,
-                        navController = navController,
-                        cartViewModel = cartViewModel
-                    )
+            val coroutineScope = rememberCoroutineScope()
+
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CategoryNavigationBar(
+                    categories = categories,
+                    selectedCategoryIndex = pagerState.currentPage,
+                    onCategorySelected = { index ->
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    }
+                )
+
+                HorizontalPager(
+                    state = pagerState, // Pass the pagerState
+                    modifier = Modifier.fillMaxSize().weight(1f)
+                ) { page ->
+                    val currentCategory = categories.getOrNull(page)
+                    if (currentCategory != null) {
+                        CategoryProductsPage(
+                            category = currentCategory,
+                            navController = navController,
+                            cartViewModel = cartViewModel
+                        )
+                    }
                 }
             }
-        }
-    } else {
-        // Handle case where category is not found
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Category not found")
+        } else {
+            // Handle case where category is not found
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Category not found")
+            }
         }
     }
 }
@@ -132,13 +156,20 @@ fun CategoryTab(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Text(
-        text = category.name,
-        style = MaterialTheme.typography.bodyLarge,
-        color = if (isSelected) Color(0xFF800080) else Color.Gray,
-        modifier = Modifier.clickable { onClick() }
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(70)) // Capsule shape
+            .background(if (isSelected) Color(0xFFFAE8A6) else Color.Transparent) // Light green when selected
+            .clickable { onClick() }
             .padding(horizontal = 8.dp, vertical = 4.dp)
-    )
+    ) {
+        Text(
+            text = category.name,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (isSelected) Color(0xFF20D78B) else Color.Gray,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp) // Extra padding for better look
+        )
+    }
 }
 
 @Composable
@@ -165,4 +196,19 @@ fun CategoryProductsPage(
             )
         }
     }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewCategoryProductsScreen() {
+    val navController = rememberNavController()
+    val cartViewModel = CartViewModel()
+
+    CategoryProductsScreen(
+        navController = navController,
+        categoryName = CategoryRepository.categories.firstOrNull()?.name ?: "Default",
+        cartViewModel = cartViewModel,
+        onBackClick = {}
+    )
 }

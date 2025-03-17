@@ -10,7 +10,7 @@ object CategoryRepository {
     val categories = listOf(
         Category(
             name = "FOOD CUPBOARD",
-            icon = "pizzimg/pizza.png",
+            icon = "https://demo8.1hour.in/media/productsCategory/Food_Cupboard_Final_Final_bcbApz0.jpg",
             items = listOf(
                 Product(
                     name = "BETTY CROCKER SUPERMOIST CAKEMIX CARROT 425G",
@@ -76,7 +76,7 @@ object CategoryRepository {
         ),
         Category(
             name = "BEVERAGES",
-            icon = "pizzimg/appetizer.png",
+            icon = "https://demo8.1hour.in/media/productsCategory/Beverages_final_ODIv5BB.PNG",
             items = listOf(
                 Product(
                     name = "TWININGS CHERRY+CINNAMON HT HS 20S",
@@ -142,7 +142,7 @@ object CategoryRepository {
         ),
         Category(
             name = "SNACKS",
-            icon = "pizzimg/rice.png",
+            icon = "https://demo8.1hour.in/media/productsCategory/Snacks_ZGuyxiB_2fEbNK2.jpg",
             items = listOf(
                 Product(
                     name = "PRINGLES CHEESE & ONION 200G",
@@ -208,7 +208,7 @@ object CategoryRepository {
         ),
         Category(
             name = "HOUSEHOLD",
-            icon = "pizzimg/drink.png",
+            icon = "https://demo8.1hour.in/media/productsCategory/HouseHold_Final_Final.jpg",
             items = listOf(
                 Product(
                     name = "HIT INSECTICIDE SPRAY LEMON 400Ml",
@@ -274,7 +274,7 @@ object CategoryRepository {
         ),
         Category(
             name = "ALCOHOL",
-            icon = "pizzimg/dessert.png",
+            icon = "https://demo8.1hour.in/media/productsCategory/Alcohol_AaHDOnN.jpg",
             items = listOf(
                 Product(
                     name = "BLUE JEANS ENERGY DRINK 250Ml",

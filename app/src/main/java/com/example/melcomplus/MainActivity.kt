@@ -1,7 +1,5 @@
-//MainActivity.kt
+// MainActivity.kt
 package com.example.melcomplus
-
-
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,8 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,22 +17,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.melcomplus.components.BottomNavigationBar
 import com.example.melcomplus.data.CategoryRepository
 import com.example.melcomplus.screens.CartScreen
 import com.example.melcomplus.screens.CategoryProductsScreen
 import com.example.melcomplus.screens.HomeScreen
 import com.example.melcomplus.screens.ProductDetailScreen
 import com.example.melcomplus.screens.SearchScreen
+import com.example.melcomplus.screens.SplashScreen
 import com.example.melcomplus.viewmodels.CartViewModel
-
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
-    object Home : Screen("home")
-    object Search : Screen("search")
-    object Cart : Screen("cart")
+    object Home : Screen("Home")
+    object Search : Screen("Search")
+    object Cart : Screen("Cart")
     object CategoryProducts : Screen("categoryProducts/{categoryName}") {
         fun createRoute(categoryName: String) = "categoryProducts/$categoryName"
     }
@@ -45,64 +41,70 @@ sealed class Screen(val route: String) {
     }
 }
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-//        installSplashScreen()
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
         setContent {
             MelcomPlusApp()
-//            HomeScreen(categories = CategoryRepository.categories)
         }
     }
 }
-
 
 @Composable
 fun MelcomPlusApp() {
     val navController = rememberNavController()
     val cartViewModel = remember { CartViewModel() }
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-
-    Scaffold(
-        bottomBar = {
-            if (currentRoute != "splash") {
-                BottomNavigationBar(navController)
-            }
-        }    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             NavHost(navController, startDestination = Screen.Splash.route) {
                 composable(Screen.Splash.route) {
-                    com.example.melcomplus.screens.SplashScreen(
-                        navController
-                    )
+                    SplashScreen(navController)
                 }
                 composable(Screen.Home.route) {
                     HomeScreen(
-                        categories = CategoryRepository.categories, // Pass the category list
-                        cartViewModel =cartViewModel,
+                        categories = CategoryRepository.categories,
                         onCategoryClick = { categoryName ->
                             navController.navigate(Screen.CategoryProducts.createRoute(categoryName))
                         },
-                        onProductClick = {product ->
+                        cartViewModel = cartViewModel,
+                        onProductClick = { product ->
                             navController.navigate(Screen.ProductDetail.createRoute(product.name))
-                        }
+                        },
+                        navController = navController, // Pass navController to HomeScreen
+//                        onBackClick = { navController.popBackStack() }
                     )
                 }
-                composable(Screen.Search.route) { SearchScreen(navController) }
-                composable(Screen.Cart.route) { CartScreen(cartViewModel) }
+                composable(Screen.Search.route) {
+                    SearchScreen(navController)
+                }
+                composable(Screen.Cart.route) {
+                    CartScreen(
+                        cartViewModel = cartViewModel,
+                        navController = navController,
+                        onBackClick = { navController.popBackStack() } // Handle back navigation
+                    )
+                }
                 composable(Screen.ProductDetail.route) { backStackEntry ->
-                    val productName = backStackEntry.arguments?.getString("productName") // Change from "productId" to "productName"
+                    val productName = backStackEntry.arguments?.getString("productName")
                     val product = CategoryRepository.categories
                         .flatMap { it.items }
-                        .find { it.name == productName } // Find the product based on its name
+                        .find { it.name == productName }
 
                     if (product != null) {
-                        ProductDetailScreen(product, cartViewModel)
+                        ProductDetailScreen(
+                            product = product,
+                            cartViewModel = cartViewModel,
+                            navController = navController,
+                            onBackClick = { navController.popBackStack() }
+                        )
                     } else {
-                        Text("Product not found") // Handle product not found case
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Product not found")
+                        }
                     }
                 }
                 composable(Screen.CategoryProducts.route) { backStackEntry ->
@@ -110,11 +112,11 @@ fun MelcomPlusApp() {
                     if (categoryName != null) {
                         CategoryProductsScreen(
                             navController = navController,
-                            categoryName = categoryName, // Pass categoryName
-                            cartViewModel = cartViewModel
+                            categoryName = categoryName,
+                            cartViewModel = cartViewModel,
+                            onBackClick = { navController.popBackStack() }
                         )
                     } else {
-                        // Handle case where categoryName is null
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -127,30 +129,6 @@ fun MelcomPlusApp() {
         }
     }
 }
-
-
-
-@Composable
-fun BottomNavigationBar(navController: NavHostController) {
-    val items = listOf(
-        Screen.Home,
-        Screen.Search,
-        Screen.Cart
-    )
-
-    NavigationBar {
-        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-        items.forEach { screen ->
-            NavigationBarItem(
-                selected = currentRoute == screen.route,
-                onClick = { navController.navigate(screen.route) },
-                label = { Text(screen.route) },
-                icon = { /* Add an Icon */ } // TODO
-            )
-        }
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
