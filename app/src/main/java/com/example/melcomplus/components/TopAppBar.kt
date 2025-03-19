@@ -39,7 +39,7 @@ fun TopNavigationBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0xFFFAE8A6) // Ensures full background color
+            containerColor = Color(0xFFFAE8A6)
         ),
         modifier = modifier
     )

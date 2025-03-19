@@ -26,5 +26,5 @@ class FavoritesViewModel : ViewModel() {
 
     val favoriteItemCount: StateFlow<Int> = _favorites
         .map { it.size }  // Transform the list into its size
-        .stateIn(viewModelScope, SharingStarted.Lazily, 0) // Ensure state is managed properly
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 }

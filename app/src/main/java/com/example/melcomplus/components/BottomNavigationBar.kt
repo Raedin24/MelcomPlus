@@ -18,8 +18,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -45,7 +47,10 @@ fun BottomNavigationBar(
     val cartItemCount by cartViewModel.cartItemCount.collectAsState()
     val favoriteItemCount by favoritesViewModel.favoriteItemCount.collectAsState()
 
-    NavigationBar {
+    NavigationBar(
+        modifier = Modifier
+            .zIndex(-1f)
+    ) {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         items.forEach { screen ->
             NavigationBarItem(

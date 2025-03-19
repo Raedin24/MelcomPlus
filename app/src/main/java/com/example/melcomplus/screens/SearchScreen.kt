@@ -52,7 +52,6 @@ import com.example.melcomplus.viewmodels.CartViewModel
 import com.example.melcomplus.viewmodels.FavoritesViewModel
 import com.example.melcomplus.viewmodels.SearchViewModel
 
-//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     navController: NavHostController,

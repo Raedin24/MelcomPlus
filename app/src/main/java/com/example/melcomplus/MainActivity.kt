@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,25 +64,51 @@ fun MelcomPlusApp() {
     val navController = rememberNavController()
     val cartViewModel = remember { CartViewModel() }
     val favoritesViewModel = remember { FavoritesViewModel() }
+    val isSplashScreenVisible = remember { mutableStateOf(true) }
 
-    Scaffold(
-        bottomBar = {
-            if (currentRoute(navController) != Screen.Splash.route) {
-                BottomNavigationBar(navController, cartViewModel, favoritesViewModel)
+        Scaffold(
+            bottomBar = {
+                if (!isSplashScreenVisible.value) {
+                    BottomNavigationBar(navController, cartViewModel, favoritesViewModel)
+                }
+            }
+        ) { paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
+                NavigationGraph(
+                    navController,
+                    cartViewModel,
+                    favoritesViewModel,
+                    isSplashScreenVisible = isSplashScreenVisible
+                )
             }
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            NavigationGraph(navController, cartViewModel, favoritesViewModel)
-        }
     }
-}
+
 
 @Composable
-fun NavigationGraph(navController: NavHostController, cartViewModel: CartViewModel, favoritesViewModel: FavoritesViewModel) {
+fun NavigationGraph(
+    navController: NavHostController,
+    cartViewModel: CartViewModel,
+    favoritesViewModel: FavoritesViewModel,
+    isSplashScreenVisible: MutableState<Boolean>
+) {
+    val currentRoute by navController.currentBackStackEntryAsState()
+
+    // Hide splash screen when navigating away from it
+    LaunchedEffect(currentRoute?.destination?.route) {
+        if (currentRoute?.destination?.route == Screen.Splash.route) {
+            kotlinx.coroutines.delay(1500)
+            navController.navigate(Screen.Home.route){
+                popUpTo(Screen.Splash.route) {inclusive = false}
+            }
+            isSplashScreenVisible.value = false
+
+        }
+    }
+
     NavHost(navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
-            SplashScreen(navController)
+            SplashScreen()
         }
         composable(Screen.Home.route) {
             HomeScreen(

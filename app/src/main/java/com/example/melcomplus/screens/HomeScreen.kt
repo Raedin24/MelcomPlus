@@ -68,7 +68,7 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Categories in a static 3-column grid (without LazyVerticalGrid)
+            // Categories in a static 3-column grid
             item {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -84,7 +84,7 @@ fun HomeScreen(
                                 Box(
                                     modifier = Modifier
                                         .weight(1f) // Makes each card take equal space
-                                        .aspectRatio(1f) // Ensures a square layout like before
+                                        .aspectRatio(1f) // Ensures a square layout
                                 ) {
                                     CategoryCard(
                                         category = category,
@@ -210,20 +210,22 @@ fun BestSellerSection(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp) // Adjust height as needed
+            .height(280.dp)
     ) {
         // Use painterResource instead of AsyncImage for local drawable
         Image(
             painter = painterResource(id = R.drawable.splashscreen),
             contentDescription = "Best Seller Background",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize()
+            modifier = Modifier
+                .matchParentSize()
+
         )
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp)
+                .padding(8.dp)
 //                .background(Color.Black.copy(alpha = 0.3f)) // Optional dark overlay
         ) {
             Text(
@@ -236,7 +238,7 @@ fun BestSellerSection(
             )
 
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(bestSellerProducts) { product ->

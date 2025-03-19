@@ -19,7 +19,6 @@ class CartViewModel : ViewModel() {
     private val _totalCost = MutableStateFlow(0.0)
     val totalCost: StateFlow<Double> get() = _totalCost.asStateFlow()
 
-    // New: cartItemCount flow
     private val _cartItemCount = MutableStateFlow(0)
     val cartItemCount: StateFlow<Int> get() = _cartItemCount.asStateFlow()
 
@@ -105,7 +104,6 @@ class CartViewModel : ViewModel() {
         }
     }
 
-    // New: Function to update cart item count
     private fun updateCartItemCount() {
         viewModelScope.launch {
             _cartItemCount.value = _cartItems.value.sumOf { it.quantity }
