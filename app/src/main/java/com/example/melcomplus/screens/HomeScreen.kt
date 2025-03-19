@@ -1,5 +1,6 @@
 package com.example.melcomplus.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,39 +13,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import com.example.melcomplus.components.BottomNavigationBar
+import com.example.melcomplus.R
 import com.example.melcomplus.components.ProductTile
 import com.example.melcomplus.models.Category
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.navigation.compose.rememberNavController
-import com.example.melcomplus.R
+import com.example.melcomplus.viewmodels.FavoritesViewModel
 
 
 @Composable
@@ -52,13 +46,12 @@ fun HomeScreen(
     categories: List<Category>,
     onCategoryClick: (String) -> Unit,
     cartViewModel: CartViewModel,
+    favoritesViewModel: FavoritesViewModel,
     onProductClick: (Product) -> Unit,
-    navController: NavHostController,
-//    onBackClick: () -> Unit
 ) {
-    Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
-    ) { paddingValues ->
+    Scaffold (
+        containerColor = Color.White
+    ){ paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -113,13 +106,14 @@ fun HomeScreen(
 //                OrderAgainSection(categories, cartViewModel, onProductClick)
                 OrderAgainSection(
                     cartViewModel = cartViewModel,
+                    favoritesViewModel = favoritesViewModel,
                     onProductClick = onProductClick
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
-                BestSellerSection(categories, cartViewModel, onProductClick)
+                BestSellerSection(categories, cartViewModel, favoritesViewModel, onProductClick)
             }
         }
     }
@@ -168,15 +162,15 @@ fun CategoryCard(category: Category, onClick: (String) -> Unit) {
 @Composable
 fun OrderAgainSection(
     cartViewModel: CartViewModel,
+    favoritesViewModel: FavoritesViewModel,
     onProductClick: (Product) -> Unit
 ) {
-    // Get the placed orders from CartViewModel
-    val orderAgainProducts = cartViewModel.placedOrders.take(5) // Show up to 5 previously ordered products
+    // Collect flow as state
+    val orderAgainProducts = cartViewModel.placedOrders.collectAsState(initial = emptyList()).value
 
     if (orderAgainProducts.isNotEmpty()) {
         Column(
-            modifier = Modifier
-                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+            modifier = Modifier.padding(top = 10.dp, start = 10.dp, end = 10.dp)
         ) {
             Text(
                 text = "Order Again",
@@ -189,10 +183,11 @@ fun OrderAgainSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(orderAgainProducts) { product ->
+                items(orderAgainProducts.take(5)) { product -> // Take only first 5 products
                     ProductTile(
                         product = product,
-                        cartViewModel =cartViewModel,
+                        cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel,
                         onProductClick = { onProductClick(product) }
                     )
                 }
@@ -202,10 +197,12 @@ fun OrderAgainSection(
 }
 
 
+
 @Composable
 fun BestSellerSection(
     categories: List<Category>,
     cartViewModel: CartViewModel,
+    favoritesViewModel: FavoritesViewModel,
     onProductClick: (Product) -> Unit
 ) {
     val bestSellerProducts = categories.flatMap { it.items.take(2) }
@@ -246,6 +243,7 @@ fun BestSellerSection(
                     ProductTile(
                         product = product,
                         cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel,
                         onProductClick = onProductClick
                     )
                 }
@@ -290,8 +288,7 @@ fun HomeScreenPreview() {
         categories = sampleCategories,
         onCategoryClick = onCategoryClick,
         cartViewModel = CartViewModel(),
+        favoritesViewModel = FavoritesViewModel(),
         onProductClick = {},
-        navController = navController,
-//        onBackClick = { navController.popBackStack() } // Handle back navigation
     )
 }

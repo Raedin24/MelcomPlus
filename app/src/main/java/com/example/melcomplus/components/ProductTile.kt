@@ -44,6 +44,7 @@ import coil.compose.AsyncImage
 import com.example.melcomplus.models.CartItem
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
+import com.example.melcomplus.viewmodels.FavoritesViewModel
 
 //@Composable
 //fun ProductTile(
@@ -346,12 +347,17 @@ import com.example.melcomplus.viewmodels.CartViewModel
 fun ProductTile(
     product: Product,
     cartViewModel: CartViewModel,
+    favoritesViewModel: FavoritesViewModel, // Added FavoritesViewModel
     onProductClick: (Product) -> Unit
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState()
     val cartItem = cartItems.find { it.product.name == product.name }
 
     var itemCount by remember { mutableStateOf(cartItem?.quantity ?: 0) }
+
+    // Observe favorites list
+    val favorites by favoritesViewModel.favorites.collectAsState()
+    val isFavorite = favorites.contains(product) // Derived state
 
     Card(
         shape = RoundedCornerShape(15.dp),
@@ -363,7 +369,7 @@ fun ProductTile(
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Product Image
             Box(
@@ -380,7 +386,7 @@ fun ProductTile(
                         .height(100.dp) // Fixed image height
                 )
 
-                // Heart Icon for Favorites (added here)
+                // Heart Icon for Favorites
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -388,22 +394,18 @@ fun ProductTile(
                 ) {
                     IconButton(
                         onClick = {
-                            if (cartViewModel.isFavorite(product)) {
-                                cartViewModel.removeFromFavorites(product)
+                            if (isFavorite) {
+                                favoritesViewModel.removeFromFavorites(product)
                             } else {
-                                cartViewModel.addToFavorites(product)
+                                favoritesViewModel.addToFavorites(product)
                             }
                         },
                         modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
-                            imageVector = if (cartViewModel.isFavorite(product)) {
-                                Icons.Default.Favorite // Filled heart
-                            } else {
-                                Icons.Default.FavoriteBorder // Outline heart
-                            },
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Add to Favorites",
-                            tint = if (cartViewModel.isFavorite(product)) Color.Red else Color.Gray
+                            tint = if (isFavorite) Color.Red else Color.Gray
                         )
                     }
                 }
@@ -413,8 +415,8 @@ fun ProductTile(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(42.dp)
-                    .padding(horizontal = 8.dp),
+                    .height(40.dp)
+                    .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (itemCount == 0) {
@@ -431,8 +433,8 @@ fun ProductTile(
                         border = BorderStroke(1.dp, Color(0xFF46389A)),
                         modifier = Modifier
                             .width(140.dp) // Fixed width
-                            .height(40.dp), // Fixed height
-                        contentPadding = PaddingValues(8.dp)
+                            .height(30.dp), // Fixed height
+                        contentPadding = PaddingValues(5.dp)
                     ) {
                         Text("Add to Cart", maxLines = 1)
                     }
@@ -440,7 +442,7 @@ fun ProductTile(
                     Row(
                         modifier = Modifier
                             .width(140.dp) // Fixed width
-                            .height(40.dp) // Fixed height
+                            .height(30.dp) // Fixed height
                             .background(Color(0xFF46389A), shape = RoundedCornerShape(15.dp))
                             .padding(horizontal = 3.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -460,7 +462,7 @@ fun ProductTile(
                             },
                             modifier = Modifier
                                 .width(40.dp)
-                                .height(36.dp), // Matches row height
+                                .height(30.dp), // Matches row height
                             contentPadding = PaddingValues(0.dp) // Remove extra padding
                         ) {
                             Text("-", color = Color.White)
@@ -487,7 +489,7 @@ fun ProductTile(
                             },
                             modifier = Modifier
                                 .width(40.dp)
-                                .height(36.dp), // Matches row height
+                                .height(30.dp), // Matches row height
                             contentPadding = PaddingValues(0.dp) // Remove extra padding
                         ) {
                             Text("+", color = Color.White)
@@ -525,6 +527,7 @@ fun ProductTile(
 
 
 
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ProductTilePreview() {
@@ -537,6 +540,7 @@ fun ProductTilePreview() {
 
     // First ViewModel: Empty Cart (Shows "Add to Cart")
     val cartViewModel1 = remember { CartViewModel() }
+    val favoritesViewModel1 = remember { FavoritesViewModel() }
 
     // Second ViewModel: Preloaded with 2 Items
     val cartViewModel2 = remember {
@@ -545,6 +549,12 @@ fun ProductTilePreview() {
             increaseQuantity(CartItem(sampleProduct, 1)) // Increase to 2
         }
     }
+    val favoritesViewModel2 = remember {
+        FavoritesViewModel().apply {
+            addToFavorites(sampleProduct)
+        }
+    }
+
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -553,12 +563,14 @@ fun ProductTilePreview() {
         ProductTile(
             product = sampleProduct,
             cartViewModel = cartViewModel1, // "Add to Cart" version
+            favoritesViewModel = favoritesViewModel1,
             onProductClick = {}
         )
 
         ProductTile(
             product = sampleProduct,
             cartViewModel = cartViewModel2, // Preloaded cart version
+            favoritesViewModel = favoritesViewModel2,
             onProductClick = {}
         )
     }

@@ -3,20 +3,37 @@ package com.example.melcomplus.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,150 +46,20 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.melcomplus.components.BottomNavigationBar
-import com.example.melcomplus.data.CategoryRepository
 import com.example.melcomplus.models.Category
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
+import com.example.melcomplus.viewmodels.FavoritesViewModel
 import com.example.melcomplus.viewmodels.SearchViewModel
 
 //@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun SearchScreen(
-//    navController: NavHostController,
-//    searchViewModel: SearchViewModel = viewModel()
-//) {
-//    var query by remember { mutableStateOf("") }
-//    val products = CategoryRepository.categories.flatMap { it.items }
-//    val filteredProducts = products.filter { it.name.contains(query, ignoreCase = true) }
-//    val recentSearches by remember { derivedStateOf { searchViewModel.recentSearches } }
-//
-//    Scaffold(
-//        bottomBar = { BottomNavigationBar(navController) }
-//    ) { paddingValues ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(paddingValues)
-//        ) {
-//            // Search bar section
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .background(Color(0xFFFFE599))
-//                    .padding(15.dp, 15.dp, 15.dp, 5.dp)
-//            ) {
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .clip(RoundedCornerShape(20.dp))
-//                        .background(Color.White)
-//                        .padding(horizontal = 10.dp, vertical = 5.dp),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray)
-//                    Spacer(modifier = Modifier)
-//                    TextField(
-//                        value = query,
-//                        onValueChange = { query = it },
-//                        placeholder = { Text("Search Products") },
-//                        singleLine = true,
-//                        modifier = Modifier.weight(1f),
-//                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-//                        keyboardActions = KeyboardActions(
-//                            onSearch = {
-//                                if (query.isNotBlank()) {
-//                                    searchViewModel.addToRecentSearches(query)
-//                                    query = "" // Clear input after search
-//                                }
-//                            }
-//                        ),
-//                        colors = TextFieldDefaults.textFieldColors(
-//                            containerColor = Color.White, // Ensure background is white
-//                            unfocusedIndicatorColor = Color.Transparent,
-//                            focusedIndicatorColor = Color.Transparent,
-//                            disabledIndicatorColor = Color.Transparent
-//                        )
-//                    )
-//                    if (query.isNotEmpty()) {
-//                        IconButton(onClick = { query = "" }) {
-//                            Icon(Icons.Default.Close, contentDescription = "Clear")
-//                        }
-//                    }
-//                }
-//            }
-//
-//            // Recent searches section
-//            if (recentSearches.isNotEmpty()) {
-//                Column(modifier = Modifier.padding(16.dp)) {
-//                    Text(
-//                        text = "Recent Searches",
-//                        style = MaterialTheme.typography.titleMedium,
-//                        color = Color.Black,
-//                        modifier = Modifier.padding(bottom = 8.dp)
-//                    )
-//
-//                    LazyRow(
-//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        items(recentSearches) { search ->
-//                            Box(
-//                                modifier = Modifier
-//                                    .clip(RoundedCornerShape(50))
-//                                    .background(Color.White)
-//                                    .border(1.dp, Color.Gray, RoundedCornerShape(50))
-//                                    .clickable { query = search }
-//                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-//                            ) {
-//                                Text(
-//                                    text = search,
-//                                    textAlign = TextAlign.Center,
-//                                    fontSize = 14.sp,
-//                                    color = Color.Black
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            // Display search results only when query is not empty
-//            if (query.isNotEmpty()) {
-//                LazyColumn {
-//                    items(filteredProducts) { product ->
-//                        Text(
-//                            text = product.name,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(8.dp)
-//                                .clickable {
-//                                    searchViewModel.addToRecentSearches(query)
-//                                    navController.navigate("productDetail/${product.name}")
-//                                }
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewSearchScreen() {
-//    val mockNavController = rememberNavController()
-//    SearchScreen(navController = mockNavController)
-//}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     navController: NavHostController,
     searchViewModel: SearchViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel(),
-    categories: List<Category> // Pass categories from the parent
+    favoritesViewModel: FavoritesViewModel = viewModel(),
+    categories: List<Category>
 ) {
     var query by remember { mutableStateOf("") }
     val products = categories.flatMap { it.items }
@@ -180,284 +67,155 @@ fun SearchScreen(
     val recentSearches by remember { derivedStateOf { searchViewModel.recentSearches } }
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
+        containerColor = Color.White
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState()) // Allow scrolling if content overflows
+                .padding(paddingValues),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            // Search bar section (unchanged)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFFFE599))
-                    .padding(15.dp, 15.dp, 15.dp, 5.dp)
-            ) {
-                Row(
+            // Search bar section
+            item {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White)
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .background(Color(0xFFFFE599))
+                        .padding(15.dp, 15.dp, 15.dp, 5.dp)
                 ) {
-                    Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray)
-                    Spacer(modifier = Modifier)
-                    TextField(
-                        value = query,
-                        onValueChange = { query = it },
-                        placeholder = { Text("Search Products") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(
-                            onSearch = {
-                                if (query.isNotBlank()) {
-                                    searchViewModel.addToRecentSearches(query)
-                                    query = "" // Clear input after search
-                                }
-                            }
-                        ),
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.White, // Ensure background is white
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
-                        )
-                    )
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Clear")
-                        }
-                    }
-                }
-            }
-
-            // Recent searches section (unchanged)
-            if (recentSearches.isNotEmpty()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Recent Searches",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.Black,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color.White)
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        items(recentSearches) { search ->
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(Color.White)
-                                    .border(1.dp, Color.Gray, RoundedCornerShape(50))
-                                    .clickable { query = search }
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                            ) {
-                                Text(
-                                    text = search,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 14.sp,
-                                    color = Color.Black
-                                )
+                        Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            placeholder = { Text("Search Products") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    if (query.isNotBlank()) {
+                                        searchViewModel.addToRecentSearches(query)
+                                        query = "" // Clear input after search
+                                    }
+                                }
+                            ),
+                            colors = androidx.compose.material3.TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent
+                            )
+                        )
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = { query = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear")
                             }
                         }
                     }
                 }
             }
 
-            // Display search results only when query is not empty
-            if (query.isNotEmpty()) {
-                LazyColumn {
-                    items(filteredProducts) { product ->
+            // Recent searches section
+            if (recentSearches.isNotEmpty()) {
+                item {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = product.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .clickable {
-                                    searchViewModel.addToRecentSearches(query)
-                                    navController.navigate("productDetail/${product.name}")
-                                }
+                            text = "Recent Searches",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.Black,
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
+
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(recentSearches) { search ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(50))
+                                        .background(Color.White)
+                                        .border(1.dp, Color.Gray, RoundedCornerShape(50))
+                                        .clickable { query = search }
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    Text(
+                                        text = search,
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 14.sp,
+                                        color = Color.Black
+                                    )
+                                }
+                            }
+                        }
                     }
+                }
+            }
+
+            // Search results section
+            if (query.isNotEmpty()) {
+                items(filteredProducts) { product ->
+                    Text(
+                        text = product.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable {
+                                searchViewModel.addToRecentSearches(query)
+                                navController.navigate("productDetail/${product.name}")
+                            }
+                    )
                 }
             } else {
-                // Add OrderAgainSection with the placed orders
-                OrderAgainSection(
-                    cartViewModel = cartViewModel, // Pass CartViewModel
-                    onProductClick = { product ->
-                        navController.navigate("productDetail/${product.name}")
-                    }
-                )
+                // OrderAgainSection
+                item {
+                    OrderAgainSection(
+                        cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel,
+                        onProductClick = { product ->
+                            navController.navigate("productDetail/${product.name}")
+                        }
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                item { Spacer(modifier = Modifier.height(16.dp)) }
 
-                // BestSellerSection (unchanged)
-                BestSellerSection(
-                    categories = categories, // Pass the same categories list
-                    cartViewModel = cartViewModel,
-                    onProductClick = { product ->
-                        navController.navigate("productDetail/${product.name}")
-                    }
-                )
+                // BestSellerSection
+                item {
+                    BestSellerSection(
+                        categories = categories,
+                        cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel,
+                        onProductClick = { product ->
+                            navController.navigate("productDetail/${product.name}")
+                        }
+                    )
+                }
             }
         }
     }
 }
 
-//@Composable
-//fun SearchScreen(
-//    navController: NavHostController,
-//    searchViewModel: SearchViewModel = viewModel(),
-//    cartViewModel: CartViewModel = viewModel()
-//) {
-//    var query by remember { mutableStateOf("") }
-//    val products = CategoryRepository.categories.flatMap { it.items }
-//    val filteredProducts = products.filter { it.name.contains(query, ignoreCase = true) }
-//    val recentSearches by remember { derivedStateOf { searchViewModel.recentSearches } }
-//
-//    Scaffold(
-//        bottomBar = { BottomNavigationBar(navController) }
-//    ) { paddingValues ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(paddingValues)
-//        ) {
-//            // Search bar section (unchanged)
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .background(Color(0xFFFFE599))
-//                    .padding(15.dp, 15.dp, 15.dp, 5.dp)
-//            ) {
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .clip(RoundedCornerShape(20.dp))
-//                        .background(Color.White)
-//                        .padding(horizontal = 10.dp, vertical = 5.dp),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray)
-//                    Spacer(modifier = Modifier)
-//                    TextField(
-//                        value = query,
-//                        onValueChange = { query = it },
-//                        placeholder = { Text("Search Products") },
-//                        singleLine = true,
-//                        modifier = Modifier.weight(1f),
-//                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-//                        keyboardActions = KeyboardActions(
-//                            onSearch = {
-//                                if (query.isNotBlank()) {
-//                                    searchViewModel.addToRecentSearches(query)
-//                                    query = "" // Clear input after search
-//                                }
-//                            }
-//                        ),
-//                        colors = TextFieldDefaults.textFieldColors(
-//                            containerColor = Color.White, // Ensure background is white
-//                            unfocusedIndicatorColor = Color.Transparent,
-//                            focusedIndicatorColor = Color.Transparent,
-//                            disabledIndicatorColor = Color.Transparent
-//                        )
-//                    )
-//                    if (query.isNotEmpty()) {
-//                        IconButton(onClick = { query = "" }) {
-//                            Icon(Icons.Default.Close, contentDescription = "Clear")
-//                        }
-//                    }
-//                }
-//            }
-//
-//            // Recent searches section (unchanged)
-//            if (recentSearches.isNotEmpty()) {
-//                Column(modifier = Modifier.padding(16.dp)) {
-//                    Text(
-//                        text = "Recent Searches",
-//                        style = MaterialTheme.typography.titleMedium,
-//                        color = Color.Black,
-//                        modifier = Modifier
-////                            .padding(bottom = 8.dp)
-//                    )
-//
-//                    LazyRow(
-//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                        modifier = Modifier.fillMaxWidth()
-//                    ) {
-//                        items(recentSearches) { search ->
-//                            Box(
-//                                modifier = Modifier
-//                                    .clip(RoundedCornerShape(50))
-//                                    .background(Color.White)
-//                                    .border(1.dp, Color.Gray, RoundedCornerShape(50))
-//                                    .clickable { query = search }
-//                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-//                            ) {
-//                                Text(
-//                                    text = search,
-//                                    textAlign = TextAlign.Center,
-//                                    fontSize = 14.sp,
-//                                    color = Color.Black
-//                                )
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            // Display search results only when query is not empty
-//            if (query.isNotEmpty()) {
-//                LazyColumn {
-//                    items(filteredProducts) { product ->
-//                        Text(
-//                            text = product.name,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(8.dp)
-//                                .clickable {
-//                                    searchViewModel.addToRecentSearches(query)
-//                                    navController.navigate("productDetail/${product.name}")
-//                                }
-//                        )
-//                    }
-//                }
-//            } else {
-//                // Add OrderAgainSection with the placed orders
-//                OrderAgainSection(
-//                    cartViewModel = cartViewModel, // Pass CartViewModel
-//                    onProductClick = { product ->
-//                        navController.navigate("productDetail/${product.name}")
-//                    }
-//                )
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                // BestSellerSection (unchanged)
-//                BestSellerSection(
-//                    categories = CategoryRepository.categories,
-//                    cartViewModel = cartViewModel,
-//                    onProductClick = { product ->
-//                        navController.navigate("productDetail/${product.name}")
-//                    }
-//                )
-//            }
-//        }
-//    }
-//}
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewSearchScreen() {
     val mockNavController = rememberNavController()
-    val mockSearchViewModel = SearchViewModel() // Mock SearchViewModel
+    val mockSearchViewModel = SearchViewModel().apply {
+        addToRecentSearches("cake") // Simulate a recent search
+    }
     val mockCartViewModel = CartViewModel() // Mock CartViewModel
+    val mockFavoritesViewModel = FavoritesViewModel()
 
     // Mock categories data for preview
     val mockCategories = listOf(
@@ -497,6 +255,7 @@ fun PreviewSearchScreen() {
         navController = mockNavController,
         searchViewModel = mockSearchViewModel,
         cartViewModel = mockCartViewModel,
+        favoritesViewModel = mockFavoritesViewModel,
         categories = mockCategories // Pass mock categories
     )
 }

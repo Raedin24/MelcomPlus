@@ -2,86 +2,50 @@
 package com.example.melcomplus.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsBike
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.melcomplus.components.BottomNavigationBar
+import coil.compose.AsyncImage
 import com.example.melcomplus.components.TopNavigationBar
 import com.example.melcomplus.models.CartItem
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
 
-//@Composable
-//fun CartScreen(
-//    cartViewModel: CartViewModel,
-//    navController: NavHostController, // Add navController
-//    onBackClick: () -> Unit // Add onBackClick for TopNavigationBar
-//) {
-//    // Collect cartItems state from CartViewModel
-//    val cartItems by cartViewModel.cartItems.collectAsState()
-//
-//    // Collect totalCost state from CartViewModel
-//    val totalCost by cartViewModel.totalCost.collectAsState()
-//
-//    Scaffold(
-//        topBar = {
-//            TopNavigationBar(
-//                title = "Cart", // Set the title for the Top App Bar
-//                onBackClick = onBackClick // Handle back navigation
-//            )
-//        },
-//        bottomBar = {
-//            BottomNavigationBar(navController) // Add the Bottom Navigation Bar
-//        }
-//    ) { paddingValues ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(paddingValues), // Use paddingValues from Scaffold
-////                .padding(16.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            if (cartItems.isEmpty()) {
-//                Text("Cart is empty", style = MaterialTheme.typography.bodyLarge)
-//            } else {
-//                LazyColumn(modifier = Modifier.weight(1f)) {
-//                    items(cartItems) { cartItem ->
-//                        CartItemRow(cartItem, cartViewModel)
-//                    }
-//                }
-//
-//                Text(
-//                    text = "Total: ₵${"%.2f".format(totalCost)}", // Use collected state
-//                    style = MaterialTheme.typography.titleLarge,
-//                    modifier = Modifier.padding(vertical = 8.dp)
-//                )
-//                Button(
-//                    onClick = { cartViewModel.clearCart() },
-//                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
-//                ) {
-//                    Text("Clear Cart")
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun CartScreen(
@@ -91,29 +55,30 @@ fun CartScreen(
 ) {
     // Collect cartItems state from CartViewModel
     val cartItems by cartViewModel.cartItems.collectAsState()
-
-    // Collect totalCost state from CartViewModel
     val totalCost by cartViewModel.totalCost.collectAsState()
 
     Scaffold(
         topBar = {
             TopNavigationBar(
-                title = "Cart", // Set the title for the Top App Bar
-                onBackClick = onBackClick // Handle back navigation
+                title = "Cart",
+                onBackClick = onBackClick
             )
         },
-        bottomBar = {
-            BottomNavigationBar(navController) // Add the Bottom Navigation Bar
-        }
+        containerColor = Color.White
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues), // Use paddingValues from Scaffold
+                .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (cartItems.isEmpty()) {
-                Text("Cart is empty", style = MaterialTheme.typography.bodyLarge)
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Cart is empty", style = MaterialTheme.typography.bodyLarge)
+                }
             } else {
                 // Delivery Section
                 Row(
@@ -122,11 +87,11 @@ fun CartScreen(
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-//                    Icon(
-//                        imageVector = Icons.Default.DirectionsCar, // Use a delivery icon
-//                        contentDescription = "Delivery",
-//                        tint = Color.Gray
-//                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.DirectionsBike,
+                        contentDescription = "Delivery",
+                        tint = Color.Gray
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
@@ -142,14 +107,14 @@ fun CartScreen(
                     }
                 }
 
-                // Cart Items
+                // Cart Items List
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(cartItems) { cartItem ->
-                        CartItemRow(cartItem, cartViewModel)
+                        CartItemRow(cartItem, cartViewModel, navController)
                     }
                 }
 
-                // Total Cost and Clear Cart Button
+                // Total Cost & Clear Cart Button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -158,7 +123,7 @@ fun CartScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Total: ₵${"%.2f".format(totalCost)}", // Use collected state
+                        text = "Total: ₵${"%.2f".format(totalCost)}",
                         style = MaterialTheme.typography.titleLarge
                     )
                     Button(
@@ -171,10 +136,7 @@ fun CartScreen(
 
                 // Place Order Button
                 Button(
-                    onClick = {
-                        // Handle place order logic
-                        cartViewModel.placeOrder(cartItems.map { it.product })
-                    },
+                    onClick = { cartViewModel.placeOrder(cartItems.map { it.product }) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -187,13 +149,17 @@ fun CartScreen(
     }
 }
 
+
 @Composable
-fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel) {
+fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel, navController: NavHostController) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .clickable {
+                navController.navigate("productDetail/${cartItem.product.name}")
+            }
     ) {
         Row(
             modifier = Modifier
@@ -207,7 +173,6 @@ fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel) {
                 modifier = Modifier
                     .size(60.dp)
                     .height(100.dp)
-//                    .fillMaxSize()
             )
 
             // Product Name and Price
@@ -215,7 +180,6 @@ fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(cartItem.product.name, style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp))
-//                Spacer(modifier = Modifier.height(4.dp))
                 Text(text = "₵${cartItem.product.price}", style = MaterialTheme.typography.bodyMedium)
             }
 
@@ -223,8 +187,7 @@ fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel) {
             Row(
                 modifier = Modifier
                     .background(Color(0xFF46389A), shape = RoundedCornerShape(20.dp))
-//                    .border(1.dp, Color(0xFF46389A), shape = RoundedCornerShape(10.dp))
-//                    .padding(horizontal = 3.dp), // Add horizontal padding
+                    .height(30.dp)
                     ,horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -236,7 +199,6 @@ fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel) {
                             cartViewModel.removeFromCart(cartItem)
                         }
                     },
-//                    modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(2.dp)
                 ) {
                     Text("-", color = Color.White)
@@ -251,7 +213,6 @@ fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel) {
 
                 TextButton(
                     onClick = { cartViewModel.increaseQuantity(cartItem) },
-//                    modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(2.dp)
                 ) {
                     Text("+", color = Color.White)
@@ -266,24 +227,21 @@ fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CartScreenPreview() {
-    val mockCartViewModel = remember { CartViewModel() } // Mock ViewModel
-    val navController = rememberNavController() // Fake NavController for preview
-
-    // Add some mock cart items
+    val mockCartViewModel = CartViewModel() // Mock ViewModel
     val sampleProduct = Product(
         name = "BETTY CROCKER SUPERMOIST CAKEMIX CARROT 425G",
         details = "Delicious carrot cake mix.",
         price = 71.99,
-        imageUrl = "https://via.placeholder.com/150" // Use a placeholder image
+        imageUrl = "https://via.placeholder.com/150"
     )
 
-    // Populate mock data
+    // Add mock data
     mockCartViewModel.addToCart(sampleProduct)
-    mockCartViewModel.addToCart(sampleProduct) // Add twice to test quantity changes
+    mockCartViewModel.addToCart(sampleProduct)
 
     CartScreen(
         cartViewModel = mockCartViewModel,
-        navController = navController,
+        navController = rememberNavController(),
         onBackClick = {}
     )
 }
