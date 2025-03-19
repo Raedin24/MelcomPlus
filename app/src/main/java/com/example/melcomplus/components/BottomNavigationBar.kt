@@ -2,6 +2,7 @@
 package com.example.melcomplus.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -10,7 +11,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.melcomplus.Screen
@@ -20,6 +20,7 @@ fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         Screen.Home,
         Screen.Search,
+        Screen.Favorites,
         Screen.Cart
     )
 
@@ -35,6 +36,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                         is Screen.Home -> Icon(Icons.Default.Home, contentDescription = "Home")
                         is Screen.Search -> Icon(Icons.Default.Search, contentDescription = "Search")
                         is Screen.Cart -> Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
+                        is Screen.Favorites -> Icon(Icons.Default.Favorite, contentDescription = "Favorites")
                         else -> null
                     }
                 }

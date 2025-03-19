@@ -110,7 +110,11 @@ fun HomeScreen(
             }
 
             item {
-                OrderAgainSection(categories, cartViewModel, onProductClick)
+//                OrderAgainSection(categories, cartViewModel, onProductClick)
+                OrderAgainSection(
+                    cartViewModel = cartViewModel,
+                    onProductClick = onProductClick
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -160,19 +164,19 @@ fun CategoryCard(category: Category, onClick: (String) -> Unit) {
     }
 }
 
+
 @Composable
 fun OrderAgainSection(
-    categories: List<Category>,
     cartViewModel: CartViewModel,
     onProductClick: (Product) -> Unit
 ) {
-    val orderAgainProducts = categories.firstOrNull()?.items?.take(2) ?: emptyList()
+    // Get the placed orders from CartViewModel
+    val orderAgainProducts = cartViewModel.placedOrders.take(5) // Show up to 5 previously ordered products
 
     if (orderAgainProducts.isNotEmpty()) {
         Column(
             modifier = Modifier
                 .padding(top = 10.dp, start = 10.dp, end = 10.dp)
-
         ) {
             Text(
                 text = "Order Again",
@@ -188,8 +192,8 @@ fun OrderAgainSection(
                 items(orderAgainProducts) { product ->
                     ProductTile(
                         product = product,
-                        cartViewModel = cartViewModel,
-                        onProductClick = onProductClick
+                        cartViewModel =cartViewModel,
+                        onProductClick = { onProductClick(product) }
                     )
                 }
             }

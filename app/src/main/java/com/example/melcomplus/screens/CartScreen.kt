@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -27,11 +28,66 @@ import com.example.melcomplus.models.CartItem
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
 
+//@Composable
+//fun CartScreen(
+//    cartViewModel: CartViewModel,
+//    navController: NavHostController, // Add navController
+//    onBackClick: () -> Unit // Add onBackClick for TopNavigationBar
+//) {
+//    // Collect cartItems state from CartViewModel
+//    val cartItems by cartViewModel.cartItems.collectAsState()
+//
+//    // Collect totalCost state from CartViewModel
+//    val totalCost by cartViewModel.totalCost.collectAsState()
+//
+//    Scaffold(
+//        topBar = {
+//            TopNavigationBar(
+//                title = "Cart", // Set the title for the Top App Bar
+//                onBackClick = onBackClick // Handle back navigation
+//            )
+//        },
+//        bottomBar = {
+//            BottomNavigationBar(navController) // Add the Bottom Navigation Bar
+//        }
+//    ) { paddingValues ->
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(paddingValues), // Use paddingValues from Scaffold
+////                .padding(16.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            if (cartItems.isEmpty()) {
+//                Text("Cart is empty", style = MaterialTheme.typography.bodyLarge)
+//            } else {
+//                LazyColumn(modifier = Modifier.weight(1f)) {
+//                    items(cartItems) { cartItem ->
+//                        CartItemRow(cartItem, cartViewModel)
+//                    }
+//                }
+//
+//                Text(
+//                    text = "Total: ₵${"%.2f".format(totalCost)}", // Use collected state
+//                    style = MaterialTheme.typography.titleLarge,
+//                    modifier = Modifier.padding(vertical = 8.dp)
+//                )
+//                Button(
+//                    onClick = { cartViewModel.clearCart() },
+//                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+//                ) {
+//                    Text("Clear Cart")
+//                }
+//            }
+//        }
+//    }
+//}
+
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel,
-    navController: NavHostController, // Add navController
-    onBackClick: () -> Unit // Add onBackClick for TopNavigationBar
+    navController: NavHostController,
+    onBackClick: () -> Unit
 ) {
     // Collect cartItems state from CartViewModel
     val cartItems by cartViewModel.cartItems.collectAsState()
@@ -54,28 +110,77 @@ fun CartScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues), // Use paddingValues from Scaffold
-//                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (cartItems.isEmpty()) {
                 Text("Cart is empty", style = MaterialTheme.typography.bodyLarge)
             } else {
+                // Delivery Section
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.DirectionsCar, // Use a delivery icon
+//                        contentDescription = "Delivery",
+//                        tint = Color.Gray
+//                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = "Delivery",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                        Text(
+                            text = "Delivery in 16 mins",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+                // Cart Items
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(cartItems) { cartItem ->
                         CartItemRow(cartItem, cartViewModel)
                     }
                 }
 
-                Text(
-                    text = "Total: ₵${"%.2f".format(totalCost)}", // Use collected state
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-                Button(
-                    onClick = { cartViewModel.clearCart() },
-                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+                // Total Cost and Clear Cart Button
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Clear Cart")
+                    Text(
+                        text = "Total: ₵${"%.2f".format(totalCost)}", // Use collected state
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Button(
+                        onClick = { cartViewModel.clearCart() },
+                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Clear Cart")
+                    }
+                }
+
+                // Place Order Button
+                Button(
+                    onClick = {
+                        // Handle place order logic
+                        cartViewModel.placeOrder(cartItems.map { it.product })
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF46389A))
+                ) {
+                    Text("Place Order", color = Color.White)
                 }
             }
         }

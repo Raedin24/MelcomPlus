@@ -62,5 +62,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.coil.compose)
     implementation("androidx.compose.foundation:foundation:1.7.8")
+    implementation("androidx.compose.material:material-icons-extended")
 
 }

@@ -27,11 +27,14 @@ import com.example.melcomplus.screens.ProductDetailScreen
 import com.example.melcomplus.screens.SearchScreen
 import com.example.melcomplus.screens.SplashScreen
 import com.example.melcomplus.viewmodels.CartViewModel
+import com.example.melcomplus.screens.FavoritesScreen
+
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Home : Screen("Home")
     object Search : Screen("Search")
+    object Favorites : Screen("Favorites")
     object Cart : Screen("Cart")
     object CategoryProducts : Screen("categoryProducts/{categoryName}") {
         fun createRoute(categoryName: String) = "categoryProducts/$categoryName"
@@ -76,7 +79,11 @@ fun MelcomPlusApp() {
                     )
                 }
                 composable(Screen.Search.route) {
-                    SearchScreen(navController)
+                    SearchScreen(
+                        navController = navController,
+                        categories = CategoryRepository.categories,
+                        cartViewModel = cartViewModel,
+                    )
                 }
                 composable(Screen.Cart.route) {
                     CartScreen(
@@ -125,13 +132,24 @@ fun MelcomPlusApp() {
                         }
                     }
                 }
-            }
+
+                composable(Screen.Favorites.route) {
+                    FavoritesScreen(
+                        cartViewModel = cartViewModel,
+                        onProductClick = { product ->
+                            navController.navigate(Screen.ProductDetail.createRoute(product.name))
+                        },
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
         }
     }
 }
+}
+
 
 @Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
+    @Composable
+    fun DefaultPreview() {
     MelcomPlusApp()
 }

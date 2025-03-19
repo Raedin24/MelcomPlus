@@ -2,6 +2,7 @@
 
 package com.example.melcomplus.viewmodels
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,48 @@ class CartViewModel : ViewModel() {
     // Use MutableStateFlow for totalCost to make it observable
     private val _totalCost = MutableStateFlow(0.0)
     val totalCost: StateFlow<Double> get() = _totalCost.asStateFlow()
+
+    // List of products from placed orders
+    private val _placedOrders = mutableStateListOf<Product>()
+    val placedOrders: List<Product> get() = _placedOrders
+
+    // Function to add products to the placed orders list
+    fun placeOrder(products: List<Product>) {
+        val uniqueProducts = LinkedHashSet<Product>(_placedOrders) // Preserve order while ensuring uniqueness
+
+        // Move existing products to the front and add new ones
+        products.reversed().forEach { product ->
+            uniqueProducts.remove(product) // Remove if it already exists
+            uniqueProducts.add(product) // Add it back to ensure it's at the front
+        }
+
+        _placedOrders.clear()
+        _placedOrders.addAll(uniqueProducts.toList().reversed()) // Maintain recent items at the front
+
+        clearCart() // Clear cart after placing order
+    }
+
+    // List of favorite products
+    private val _favorites = MutableStateFlow<List<Product>>(emptyList())
+    val favorites: StateFlow<List<Product>> get() = _favorites
+
+    // Add a product to favorites
+    fun addToFavorites(product: Product) {
+        _favorites.value = _favorites.value + product
+    }
+
+    // Remove a product from favorites
+    fun removeFromFavorites(product: Product) {
+        _favorites.value = _favorites.value - product
+    }
+
+    // Check if a product is in favorites
+    // Check if a product is in favorites
+    fun isFavorite(product: Product): Boolean {
+        return _favorites.value.contains(product)
+    }
+
+
 
     fun addToCart(product: Product) {
         viewModelScope.launch {
