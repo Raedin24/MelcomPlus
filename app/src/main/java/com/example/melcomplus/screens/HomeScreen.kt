@@ -1,62 +1,91 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.melcomplus.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.melcomplus.R
 import com.example.melcomplus.components.ProductTile
+import com.example.melcomplus.data.CategoryRepository
 import com.example.melcomplus.models.Category
 import com.example.melcomplus.models.Product
+import com.example.melcomplus.models.Subcategory
 import com.example.melcomplus.viewmodels.CartViewModel
 import com.example.melcomplus.viewmodels.FavoritesViewModel
-
 
 @Composable
 fun HomeScreen(
     categories: List<Category>,
-    onCategoryClick: (String) -> Unit,
     cartViewModel: CartViewModel,
     favoritesViewModel: FavoritesViewModel,
+    onCategoryClick: (String) -> Unit,
     onProductClick: (Product) -> Unit,
+    onBackClick: () -> Unit
 ) {
-    Scaffold (
+    Scaffold(
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .background(Color(0xFFE69181)),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 10.dp, top = 16.dp, end = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_left),
+                        contentDescription = "Back",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable { onBackClick() }
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Hi, Kofi!",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif
+                        ),
+                        color = Color.Black
+                    )
+                }
+            }
+        },
         containerColor = Color.White
-    ){ paddingValues ->
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(bottom = 16.dp) // Prevents overlap with bottom bar
+                .padding(horizontal = 10.dp, vertical = 16.dp)
         ) {
             item {
                 Text(
@@ -65,34 +94,25 @@ fun HomeScreen(
                     color = Color.Black,
                     modifier = Modifier.padding(10.dp)
                 )
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Categories in a static 3-column grid
             item {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val rows = categories.chunked(3) // Split categories into rows of 3
-                    rows.forEach { rowCategories ->
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val rows = categories.chunked(3)
+                    for (rowCategories in rows) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            rowCategories.forEach { category ->
+                            for (category in rowCategories) {
                                 Box(
                                     modifier = Modifier
-                                        .weight(1f) // Makes each card take equal space
-                                        .aspectRatio(1f) // Ensures a square layout
+                                        .weight(1f)
+                                        .aspectRatio(1f)
                                 ) {
-                                    CategoryCard(
-                                        category = category,
-                                        onClick = { onCategoryClick(category.name) }
-                                    )
+                                    CategoryCard(category = category, onClick = { onCategoryClick(category.name) })
                                 }
                             }
-                            // Fill empty spaces if the last row has less than 3 items
                             repeat(3 - rowCategories.size) {
                                 Spacer(modifier = Modifier.weight(1f))
                             }
@@ -103,12 +123,7 @@ fun HomeScreen(
             }
 
             item {
-//                OrderAgainSection(categories, cartViewModel, onProductClick)
-                OrderAgainSection(
-                    cartViewModel = cartViewModel,
-                    favoritesViewModel = favoritesViewModel,
-                    onProductClick = onProductClick
-                )
+                OrderAgainSection(cartViewModel, favoritesViewModel, onProductClick)
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -119,45 +134,43 @@ fun HomeScreen(
     }
 }
 
-
-
 @Composable
 fun CategoryCard(category: Category, onClick: (String) -> Unit) {
-    Box(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
+            .width(140.dp)
+            .wrapContentHeight()
             .padding(4.dp)
-//            .clickable(onClick = onClick)
-            .clickable { onClick.invoke(category.name) }
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFffe8a4))
+            .clickable { onClick(category.name) }
     ) {
-        // Background Image
-        AsyncImage(
-            model = category.icon,
-            contentDescription = category.name,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.matchParentSize()
-        )
-
-        // Text Overlay on Top Left
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black.copy(alpha = 0.4f)) // Semi-transparent overlay
-                .padding(8.dp),
-            contentAlignment = Alignment.TopStart
+                .padding(top = 2.dp, start = 10.dp, end = 10.dp)
         ) {
             Text(
                 text = category.name,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White,
-                fontSize = 14.sp,
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif,
+                lineHeight = 20.sp
             )
         }
+
+        AsyncImage(
+            model = category.icon,
+            contentDescription = category.name,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .heightIn(min = 100.dp, max = 120.dp)
+        )
     }
 }
-
 
 @Composable
 fun OrderAgainSection(
@@ -165,13 +178,11 @@ fun OrderAgainSection(
     favoritesViewModel: FavoritesViewModel,
     onProductClick: (Product) -> Unit
 ) {
-    // Collect flow as state
     val orderAgainProducts = cartViewModel.placedOrders.collectAsState(initial = emptyList()).value
+    val cartItems = cartViewModel.cartItems.collectAsState(initial = emptyList()).value
 
     if (orderAgainProducts.isNotEmpty()) {
-        Column(
-            modifier = Modifier.padding(top = 10.dp, start = 10.dp, end = 10.dp)
-        ) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp)) {
             Text(
                 text = "Order Again",
                 style = MaterialTheme.typography.headlineSmall,
@@ -179,71 +190,12 @@ fun OrderAgainSection(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(orderAgainProducts.take(5)) { product -> // Take only first 5 products
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(orderAgainProducts.take(5)) { product ->
+                    val isInCart = cartItems.any { it.product.name == product.name }
                     ProductTile(
                         product = product,
-                        cartViewModel = cartViewModel,
-                        favoritesViewModel = favoritesViewModel,
-                        onProductClick = { onProductClick(product) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-
-@Composable
-fun BestSellerSection(
-    categories: List<Category>,
-    cartViewModel: CartViewModel,
-    favoritesViewModel: FavoritesViewModel,
-    onProductClick: (Product) -> Unit
-) {
-    val bestSellerProducts = categories.flatMap { it.items.take(2) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(280.dp)
-    ) {
-        // Use painterResource instead of AsyncImage for local drawable
-        Image(
-            painter = painterResource(id = R.drawable.splashscreen),
-            contentDescription = "Best Seller Background",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .matchParentSize()
-
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-//                .background(Color.Black.copy(alpha = 0.3f)) // Optional dark overlay
-        ) {
-            Text(
-                text = "Best Seller",
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White,
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .background(Color.Black.copy(alpha = 0.3f)) // Optional dark overlay
-            )
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(bestSellerProducts) { product ->
-                    ProductTile(
-                        product = product,
+                        isInCart = isInCart,
                         cartViewModel = cartViewModel,
                         favoritesViewModel = favoritesViewModel,
                         onProductClick = onProductClick
@@ -254,6 +206,61 @@ fun BestSellerSection(
     }
 }
 
+@Composable
+fun BestSellerSection(
+    categories: List<Category>,
+    cartViewModel: CartViewModel,
+    favoritesViewModel: FavoritesViewModel,
+    onProductClick: (Product) -> Unit
+) {
+    val bestSellerProducts = categories
+        .flatMap { it.subcategories }
+        .flatMap { it.products }
+        .take(10)
+
+    val cartItems = cartViewModel.cartItems.collectAsState(initial = emptyList()).value
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(320.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.splashscreen),
+            contentDescription = "Best Seller Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize()
+        )
+
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color(0xFFFFA726).copy(alpha = 0.3f))
+        )
+
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Text(
+                text = "Best Seller",
+                style = MaterialTheme.typography.headlineSmall,
+                color = Color.Black,
+                modifier = Modifier.padding(start = 10.dp, bottom = 8.dp)
+            )
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                items(bestSellerProducts) { product ->
+                    val isInCart = cartItems.any { it.product.name == product.name }
+                    ProductTile(
+                        product = product,
+                        isInCart = isInCart,
+                        cartViewModel = cartViewModel,
+                        favoritesViewModel = favoritesViewModel,
+                        onProductClick = onProductClick
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -262,35 +269,31 @@ fun HomeScreenPreview() {
         Category(
             name = "FOOD CUPBOARD",
             icon = "pizzimg/pizza.png",
-            items = listOf(
-                Product(
-                    name = "BETTY CROCKER SUPERMOIST CAKEMIX CARROT 425G",
-                    details = "Betty Crocker Supermoist Cakemix Carrot 425G",
-                    price = 71.99,
-                    imageUrl = "https://demo8.1hour.in/media/products/18366.png"
-                ),
-                Product(
-                    name = "GOYA VIENNA SAUSAGE 142Gms 46Oz",
-                    details = "Goya Vienna Sausage 142Gms 46Oz",
-                    price = 2.40,
-                    imageUrl = "https://demo8.1hour.in/media/products/18356.png"
+            subcategories = listOf(
+                Subcategory(
+                    name = "Baking Mixes",
+                    imageUrl = "https://demo8.1hour.in/media/productsSubCategory/bakingmix.png",
+                    products = listOf(
+                        Product(
+                            sku = "123",
+                            name = "CAKE MIX",
+                            details = "Yummy cake mix",
+                            price = 20.0,
+                            imageUrl = "https://demo8.1hour.in/media/products/18366.png",
+                            type = "GROCERY"
+                        )
+                    )
                 )
             )
         )
     )
 
-//    val navController = androidx.navigation.compose.rememberNavController()
-    val navController = rememberNavController()
-    // Fix: Define onCategoryClick properly
-    val onCategoryClick: (String) -> Unit = { categoryName ->
-        navController.navigate("category/$categoryName")
-    }
-
     HomeScreen(
         categories = sampleCategories,
-        onCategoryClick = onCategoryClick,
         cartViewModel = CartViewModel(),
         favoritesViewModel = FavoritesViewModel(),
+        onCategoryClick = {},
         onProductClick = {},
+        onBackClick = {}
     )
 }

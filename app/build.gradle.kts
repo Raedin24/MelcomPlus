@@ -64,6 +64,8 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:1.7.8")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("com.opencsv:opencsv:5.7.1")
+
 
 
 }

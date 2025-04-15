@@ -39,7 +39,7 @@ class CartViewModel : ViewModel() {
 
     fun addToCart(product: Product) {
         viewModelScope.launch {
-            val existingItem = _cartItems.value.find { it.product.name == product.name }
+            val existingItem = _cartItems.value.find { it.product.sku == product.sku }
             if (existingItem != null) {
                 _cartItems.value = _cartItems.value.map {
                     if (it.product.name == product.name) it.copy(quantity = it.quantity + 1)

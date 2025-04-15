@@ -1,18 +1,11 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.melcomplus.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -22,18 +15,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +31,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.melcomplus.models.Category
 import com.example.melcomplus.models.Product
+import com.example.melcomplus.models.Subcategory
 import com.example.melcomplus.viewmodels.CartViewModel
 import com.example.melcomplus.viewmodels.FavoritesViewModel
 import com.example.melcomplus.viewmodels.SearchViewModel
@@ -55,26 +39,47 @@ import com.example.melcomplus.viewmodels.SearchViewModel
 @Composable
 fun SearchScreen(
     navController: NavHostController,
+    selectedType: String, // ✅ Type filter added
     searchViewModel: SearchViewModel = viewModel(),
     cartViewModel: CartViewModel = viewModel(),
     favoritesViewModel: FavoritesViewModel = viewModel(),
     categories: List<Category>
 ) {
     var query by remember { mutableStateOf("") }
-    val products = categories.flatMap { it.items }
-    val filteredProducts = products.filter { it.name.contains(query, ignoreCase = true) }
+
+    // All products
+    val allProducts = categories.flatMap { it.subcategories.flatMap { sub -> sub.products } }
+
+    // Search filter
+    val filteredProducts = allProducts.filter { it.name.contains(query, ignoreCase = true) }
+
+    // Recent searches
     val recentSearches by remember { derivedStateOf { searchViewModel.recentSearches } }
 
-    Scaffold(
-        containerColor = Color.White
-    ) { paddingValues ->
+    // ✅ Filtered categories by selectedType for best sellers
+    val filteredCategories = remember(selectedType, categories) {
+        categories.filter { cat ->
+            cat.subcategories.any { sub ->
+                sub.products.any { it.type.equals(selectedType, ignoreCase = true) }
+            }
+        }.map { cat ->
+            cat.copy(
+                subcategories = cat.subcategories.map { sub ->
+                    sub.copy(products = sub.products.filter {
+                        it.type.equals(selectedType, ignoreCase = true)
+                    })
+                }.filter { it.products.isNotEmpty() }
+            )
+        }.filter { it.subcategories.isNotEmpty() }
+    }
+
+    Scaffold(containerColor = Color.White) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            // Search bar section
             item {
                 Box(
                     modifier = Modifier
@@ -103,11 +108,10 @@ fun SearchScreen(
                                 onSearch = {
                                     if (query.isNotBlank()) {
                                         searchViewModel.addToRecentSearches(query)
-                                        query = "" // Clear input after search
                                     }
                                 }
                             ),
-                            colors = androidx.compose.material3.TextFieldDefaults.colors(
+                            colors = TextFieldDefaults.colors(
                                 focusedContainerColor = Color.White,
                                 unfocusedContainerColor = Color.White,
                                 unfocusedIndicatorColor = Color.Transparent,
@@ -124,7 +128,6 @@ fun SearchScreen(
                 }
             }
 
-            // Recent searches section
             if (recentSearches.isNotEmpty()) {
                 item {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -135,10 +138,7 @@ fun SearchScreen(
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
 
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(recentSearches) { search ->
                                 Box(
                                     modifier = Modifier
@@ -161,7 +161,6 @@ fun SearchScreen(
                 }
             }
 
-            // Search results section
             if (query.isNotEmpty()) {
                 items(filteredProducts) { product ->
                     Text(
@@ -170,33 +169,31 @@ fun SearchScreen(
                             .fillMaxWidth()
                             .padding(8.dp)
                             .clickable {
-                                searchViewModel.addToRecentSearches(query)
+                                searchViewModel.addToRecentSearches(product.name)
                                 navController.navigate("productDetail/${product.name}")
                             }
                     )
                 }
             } else {
-                // OrderAgainSection
                 item {
                     OrderAgainSection(
                         cartViewModel = cartViewModel,
                         favoritesViewModel = favoritesViewModel,
-                        onProductClick = { product ->
-                            navController.navigate("productDetail/${product.name}")
+                        onProductClick = {
+                            navController.navigate("productDetail/${it.name}")
                         }
                     )
                 }
 
                 item { Spacer(modifier = Modifier.height(16.dp)) }
 
-                // BestSellerSection
                 item {
                     BestSellerSection(
-                        categories = categories,
+                        categories = filteredCategories, // ✅ Filtered by type
                         cartViewModel = cartViewModel,
                         favoritesViewModel = favoritesViewModel,
-                        onProductClick = { product ->
-                            navController.navigate("productDetail/${product.name}")
+                        onProductClick = {
+                            navController.navigate("productDetail/${it.name}")
                         }
                     )
                 }
@@ -205,46 +202,40 @@ fun SearchScreen(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewSearchScreen() {
     val mockNavController = rememberNavController()
-    val mockSearchViewModel = SearchViewModel().apply {
-        addToRecentSearches("cake") // Simulate a recent search
-    }
-    val mockCartViewModel = CartViewModel() // Mock CartViewModel
+    val mockSearchViewModel = SearchViewModel().apply { addToRecentSearches("cake") }
+    val mockCartViewModel = CartViewModel()
     val mockFavoritesViewModel = FavoritesViewModel()
 
-    // Mock categories data for preview
     val mockCategories = listOf(
         Category(
             name = "FOOD CUPBOARD",
             icon = "pizzimg/pizza.png",
-            items = listOf(
-                Product(
-                    name = "BETTY CROCKER SUPERMOIST CAKEMIX CARROT 425G",
-                    details = "Betty Crocker Supermoist Cakemix Carrot 425G",
-                    price = 71.99,
-                    imageUrl = "https://demo8.1hour.in/media/products/18366.png"
-                ),
-                Product(
-                    name = "GOYA VIENNA SAUSAGE 142Gms 46Oz",
-                    details = "Goya Vienna Sausage 142Gms 46Oz",
-                    price = 2.40,
-                    imageUrl = "https://demo8.1hour.in/media/products/18356.png"
-                )
-            )
-        ),
-        Category(
-            name = "BEVERAGES",
-            icon = "beverages/icon.png",
-            items = listOf(
-                Product(
-                    name = "COCA-COLA 1.5L",
-                    details = "Refreshing Coca-Cola 1.5L",
-                    price = 5.99,
-                    imageUrl = "https://demo8.1hour.in/media/products/18367.png"
+            subcategories = listOf(
+                Subcategory(
+                    name = "CAKE MIXES",
+                    imageUrl = "https://demo8.1hour.in/media/productsSubCategory/bbq-meat-feast3867.png",
+                    products = listOf(
+                        Product(
+                            sku = "178523",
+                            name = "BETTY CROCKER SUPERMOIST CAKEMIX CARROT 425G",
+                            details = "Betty Crocker Supermoist Cakemix Carrot 425G",
+                            price = 71.99,
+                            imageUrl = "https://demo8.1hour.in/media/products/18366.png",
+                            type = "GROCERY"
+                        ),
+                        Product(
+                            sku = "183556",
+                            name = "GOYA VIENNA SAUSAGE 142Gms 46Oz",
+                            details = "Goya Vienna Sausage 142Gms 46Oz",
+                            price = 2.40,
+                            imageUrl = "https://demo8.1hour.in/media/products/18356.png",
+                            type = "GROCERY"
+                        )
+                    )
                 )
             )
         )
@@ -252,9 +243,10 @@ fun PreviewSearchScreen() {
 
     SearchScreen(
         navController = mockNavController,
+        selectedType = "GROCERY", // ✅ Preview using GROCERY type
         searchViewModel = mockSearchViewModel,
         cartViewModel = mockCartViewModel,
         favoritesViewModel = mockFavoritesViewModel,
-        categories = mockCategories // Pass mock categories
+        categories = mockCategories
     )
 }

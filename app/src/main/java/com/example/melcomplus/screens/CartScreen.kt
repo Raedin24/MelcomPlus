@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -46,7 +47,7 @@ import com.example.melcomplus.models.CartItem
 import com.example.melcomplus.models.Product
 import com.example.melcomplus.viewmodels.CartViewModel
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel,
@@ -227,12 +228,14 @@ fun CartItemRow(cartItem: CartItem, cartViewModel: CartViewModel, navController:
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CartScreenPreview() {
-    val mockCartViewModel = CartViewModel() // Mock ViewModel
+    val mockCartViewModel = CartViewModel()
     val sampleProduct = Product(
+        sku = "178523",
         name = "BETTY CROCKER SUPERMOIST CAKEMIX CARROT 425G",
         details = "Delicious carrot cake mix.",
         price = 71.99,
-        imageUrl = "https://via.placeholder.com/150"
+        imageUrl = "https://demo8.1hour.in/media/products/18366.png",
+        type = "GROCERY"
     )
 
     // Add mock data
